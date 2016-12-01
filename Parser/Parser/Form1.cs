@@ -13,6 +13,8 @@ namespace Parser
 {
     public partial class Form1 : Form
     {
+        Colomn_Numbers Colomn_N = (Colomn_Numbers)Serializer.LoadFromXML("Colomns.xml", typeof(Colomn_Numbers));
+
         public Form1()
         {
             InitializeComponent();
@@ -34,8 +36,8 @@ namespace Parser
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Colomn_Numbers CN = new Colomn_Numbers();
-            CN.SaveToXML("Colomns.xml");
+            CONTRACT CN = new CONTRACT();
+            CN.SaveToXML("Test.xml");
 
         }
     }
