@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Colomn_Numbers.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="CONTRACT.cs" />
     <Compile Include="Excel_Table.cs" />
     <Compile Include="Form1.cs">

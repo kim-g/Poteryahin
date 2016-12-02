@@ -10,7 +10,9 @@ namespace Parser
     public class Excel_Table
     {
 
-        string[,] list;
+        public string[,] list;
+        public int Table_Width;
+        public int Table_Height;
 
         public static Excel_Table LoadFromFile(string FileName)
         {
@@ -27,11 +29,11 @@ namespace Parser
             Excel_Table ET = new Excel_Table();
 
             var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);// Находим последнюю ячейку.
-            int Table_Width = lastCell.Column;
-            int Table_Height = lastCell.Row;
-            ET.list = new string[Table_Width, Table_Height]; // массив значений с листа равен по размеру листу
-            for (int i = 0; i < Table_Width; i++) //по всем колонкам
-                for (int j = 0; j < Table_Height; j++) // по всем строкам
+            ET.Table_Width = lastCell.Column;
+            ET.Table_Height = lastCell.Row;
+            ET.list = new string[ET.Table_Width, ET.Table_Height]; // массив значений с листа равен по размеру листу
+            for (int i = 0; i < ET.Table_Width; i++) //по всем колонкам
+                for (int j = 0; j < ET.Table_Height; j++) // по всем строкам
                     ET.list[i, j] = ObjWorkSheet.Cells[j + 1, i + 1].Text.ToString();//считываем текст в строку
             ObjWorkBook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя
 

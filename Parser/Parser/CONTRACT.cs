@@ -5,44 +5,35 @@ namespace Parser
 {
     public class CONTRACT : Serializer
     {
-        public string Status = "A";
-        public string DealerCode = "A";
-        public string DealerPointCode = "A";
-        public string DealerContractCode = "A";
-        public string DealerContractDate = "A";
-        public string ABSContractCode = "A";
+        public string Status = "";
+        public string DealerCode = "";
+        public string DealerPointCode = "";
+        public string DealerContractCode = "";
+        public string DealerContractDate = "";
+        public string ABSContractCode = "";
         public Customer CUSTOMER = new Customer();
-        public string BANKPROPLIST = "A";
+        public string BANKPROPLIST = "";
         public Delivery DELIVERY = new Delivery();
         public Contact CONTACT = new Contact();
         public Connections CONNECTIONS = new Connections();
         public List<LOGPARAM> LOGPARAMS = new List<LOGPARAM>();
-        public string Comments = "A";
-        public string CLIENTVER = "A";
-
-        public CONTRACT()
-        {
-            LOGPARAMS.Add(new LOGPARAM());
-            LOGPARAMS.Add(new LOGPARAM());
-            LOGPARAMS.Add(new LOGPARAM());
-            LOGPARAMS.Add(new LOGPARAM());
-            LOGPARAMS.Add(new LOGPARAM());
-        } 
+        public string Comments = "";
+        public string CLIENTVER = "";
     }
 
     public class Customer
     {
-        public string CUSTOMERTYPESId = "A";
-        public string SPHERESId = "A";
-        public string Resident = "A";
-        public string Ratepayer = "A";
+        public string CUSTOMERTYPESId = "";
+        public string SPHERESId = "";
+        public string Resident = "";
+        public string Ratepayer = "";
         public Person PERSON = new Person();
         public Address ADDRESS = new Address();
     }
 
     public class Person
     {
-        public string PERSONTYPESId = "A";
+        public string PERSONTYPESId = "";
         public PersonName PERSONNAME = new PersonName();
         public Document DOCUMENT = new Document();
         public string INN = "";
@@ -50,58 +41,58 @@ namespace Parser
 
     public class PersonName
     {
-        public string SEXTYPESId = "A"; //??? Пол?
-        public string LastName = "A";
-        public string FirstName = "A";
-        public string SecondName = "A";
+        public string SEXTYPESId = ""; //??? Пол?
+        public string LastName = "";
+        public string FirstName = "";
+        public string SecondName = "";
     }
 
     public class Document
     {
-        public string DOCTYPESId = "A";
-        public string Seria = "A";
-        public string Number = "A";
-        public string GivenBy = "A";
-        public string Date = "A";
-        public string Birthday = "A";
+        public string DOCTYPESId = "";
+        public string Seria = "";
+        public string Number = "";
+        public string GivenBy = "";
+        public string Date = "";
+        public string Birthday = "";
     }
 
     public class Address
     {
-        public string ZIP = "A";
-        public string Country = "A";
-        public string Area = "A";
-        public string Region = "A";
-        public string PLACETYPESId = "A";
-        public string PlaceName = "A";
-        public string STREETTYPESId = "A";
-        public string StreetName = "A";
-        public string House = "A";
-        public string BUILDINGTYPESId = "A";
-        public string Building = "A";
+        public string ZIP = "";
+        public string Country = "";
+        public string Area = "";
+        public string Region = "";
+        public string PLACETYPESId = "";
+        public string PlaceName = "";
+        public string STREETTYPESId = "";
+        public string StreetName = "";
+        public string House = "";
+        public string BUILDINGTYPESId = "";
+        public string Building = "";
         public string ROOMTYPESId = "";
-        public string Room = "A";
+        public string Room = "";
     }
 
     public class Delivery
     {
-        public string DELIVERYTYPESId = "A";
+        public string DELIVERYTYPESId = "";
         public Address ADDRESS = new Address();
-        public string Notes = "A";
+        public string Notes = "";
     }
 
     public class Contact
     {
         public PersonName PERSONNAME = new PersonName();
-        public string PhonePrefix = "A";
-        public string Phone = "A";
-        public string FaxPrefix = "A";
-        public string Fax = "A";
-        public string EMail = "A";
-        public string PagerOperatorPrefix = "A";
-        public string PagerOperator = "A";
-        public string PagerAbonent = "A";
-        public string Notes = "A";
+        public string PhonePrefix = "";
+        public string Phone = "";
+        public string FaxPrefix = "";
+        public string Fax = "";
+        public string EMail = "";
+        public string PagerOperatorPrefix = "";
+        public string PagerOperator = "";
+        public string PagerAbonent = "";
+        public string Notes = "";
     }
 
     public class Connections
@@ -111,13 +102,13 @@ namespace Parser
 
     public class Connection
     {
-        public string PAYSYSTEMSId = "A";
-        public string BILLCYCLESId = "A";
-        public string CELLNETSId = "A";
-        public string PRODUCTSId = "A";
-        public string PhoneOwner = "A";
-        public string SerNumber = "A";
-        public string SimLock = "A";
+        public string PAYSYSTEMSId = "";
+        public string BILLCYCLESId = "";
+        public string CELLNETSId = "";
+        public string PRODUCTSId = "";
+        public string PhoneOwner = "";
+        public string SerNumber = "";
+        public string SimLock = "";
         public string IMSI = "";
         public Mobiles MOBILES = new Mobiles();
     }
@@ -129,26 +120,18 @@ namespace Parser
 
     public class Mobile
     {
-        public string CHANNELTYPESId = "A";
-        public string CHANNELLENSId = "A";
-        public string SNB = "A";
-        public string BILLPLANSId = "A";
+        public string CHANNELTYPESId = "";
+        public string CHANNELLENSId = "";
+        public string SNB = "";
+        public string BILLPLANSId = "";
         public List<string> SERVICES = new List<string>();
-
-        public Mobile()
-        {
-            SERVICES.Add("1");
-            SERVICES.Add("6");
-            SERVICES.Add("8");
-            SERVICES.Add("34");
-        }
     }
 
     public class LOGPARAM
     {
-        public string LOGPARAMSId = "A";
-        public string LOGPARAMSCode = "A";
-        public string LOGPARAMSValue = "A";
+        public string LOGPARAMSId = "";
+        public string LOGPARAMSCode = "";
+        public string LOGPARAMSValue = "";
     }
 
 }
