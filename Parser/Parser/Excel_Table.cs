@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Parser
@@ -33,7 +29,7 @@ namespace Parser
             ET.Table_Height = lastCell.Row;
             ET.list = new string[ET.Table_Width, ET.Table_Height]; // массив значений с листа равен по размеру листу
             for (int i = 0; i < ET.Table_Width; i++) //по всем колонкам
-                for (int j = 0; j < ET.Table_Height; j++) // по всем строкам
+                for (int j = 1; j < ET.Table_Height; j++) // по всем строкам
                     ET.list[i, j] = ObjWorkSheet.Cells[j + 1, i + 1].Text.ToString();//считываем текст в строку
             ObjWorkBook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя
 
