@@ -36,14 +36,29 @@ namespace Parser
             }
         }
 
+        public static string OpenDirectory()
+        {
+            FolderBrowserDialog directoryDialog = new FolderBrowserDialog();
+            directoryDialog.ShowDialog();
+            return directoryDialog.SelectedPath == "" ? "<Cancel>" : directoryDialog.SelectedPath;
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
+            //Вычисление времени работы. Начальная точка
+            DateTime StartTime = DateTime.Now;
+
             // Создание массива
             Contracts = new List<CONTRACT>();
 
-            // Загрузка таблицы
+            // Определение файла с информацией и папки, куда складывать всё.
             string ExcelFileName = OpenFile();
             if (ExcelFileName == "<Cancel>") return;
+
+            string OutputDirectory = OpenDirectory();
+            if (OutputDirectory == "<Cancel>") return;
+
+            // Загрузка таблицы
             Excel_Table Table;
             try
             {
@@ -70,9 +85,11 @@ namespace Parser
 
             // Вставка данных в шаблон и сохранение этого безобразия.
             for (int i = 0; i < Contracts.Count; i++)
-                File.WriteAllText("OUT\\Card_" + i.ToString("D8") + ".xml", Contracts[i].ToXMLString(Example), Encoding.GetEncoding("Windows-1251"));
+                File.WriteAllText(OutputDirectory + "\\Card_" + i.ToString("D8") + ".xml", Contracts[i].ToXMLString(Example), Encoding.GetEncoding("Windows-1251"));
 
-
+            DateTime EndTime = DateTime.Now;
+            TimeSpan period = EndTime - StartTime;
+            MessageBox.Show("Экспорт завёршён.\nВремя работы: " + period.ToString("hh\\:mm\\:ss"), "Завершение работы");
         }
 
         private CONTRACT GetContract(Excel_Table Table, int i, Editable_Params Params, Colomn_Numbers Colomn_N)
@@ -194,6 +211,8 @@ namespace Parser
 
         private void button2_Click(object sender, EventArgs e)
         {
+            MessageBox.Show(OpenDirectory());
+
             Editable_Params EP = (Editable_Params)Serializer.LoadFromXML("Parameters.xml", typeof(Editable_Params));
 
             // Сюда вставляем добавление параметров
