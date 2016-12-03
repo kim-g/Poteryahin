@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -61,11 +62,15 @@ namespace Parser
             Editable_Params Params = (Editable_Params)Serializer.LoadFromXML("Parameters.xml", typeof(Editable_Params));
 
             // Вставка контента в объекты
-            for (int i = 0; i < Table.Table_Height; i++)
+            for (int i = 1; i < Table.Table_Height; i++)
                 Contracts.Add(GetContract(Table, i, Params, Colomn_N));
 
             // Загрузка шаблона 
-            string Example = System.IO.File.ReadAllText("Example.xml", Encoding.GetEncoding("Windows-1251"));
+            string Example = File.ReadAllText("Example.xml", Encoding.GetEncoding("Windows-1251"));
+
+            // Вставка данных в шаблон и сохранение этого безобразия.
+            for (int i = 0; i < Contracts.Count; i++)
+                File.WriteAllText("OUT\\Card_" + i.ToString("D8") + ".xml", Contracts[i].ToXMLString(Example), Encoding.GetEncoding("Windows-1251"));
 
 
         }

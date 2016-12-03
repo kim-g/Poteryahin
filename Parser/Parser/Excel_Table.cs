@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Parser
@@ -43,7 +44,7 @@ namespace Parser
 
         public List<string> ListFromCell(int i, int j, char Spacer)
         {
-            return (List<string>)list[i, j].Split(Spacer).GetEnumerator();
+            return (List<string>)list[i, j].Split(Spacer).ToList();
         }
     }
 }
