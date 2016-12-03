@@ -18,6 +18,8 @@ namespace Parser
         public List<LOGPARAM> LOGPARAMS = new List<LOGPARAM>();
         public string Comments;
         public string CLIENTVER;
+
+        //Сделал полное внесение всех данных в карточку. Осталось сделать вывод в XML
     }
 
     public class Customer

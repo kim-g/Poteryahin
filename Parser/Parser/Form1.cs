@@ -67,6 +67,7 @@ namespace Parser
             // Загрузка шаблона 
             string Example = System.IO.File.ReadAllText("Example.xml", Encoding.GetEncoding("Windows-1251"));
 
+
         }
 
         private CONTRACT GetContract(Excel_Table Table, int i, Editable_Params Params, Colomn_Numbers Colomn_N)
@@ -81,6 +82,8 @@ namespace Parser
             Con.DealerContractDate = Params.Const.DealerContractDate;
             Con.ABSContractCode = Params.Const.ABSContractCode;
             Con.BANKPROPLIST = Params.Const.BANKPROPLIST;
+            Con.Comments = Params.Const.Comments;
+            Con.CLIENTVER = Params.Const.CLIENTVER;
 
             //CUSTOMER
             Con.CUSTOMER.CUSTOMERTYPESId = Params.Const.CUSTOMERTYPESId;
@@ -143,13 +146,46 @@ namespace Parser
             Con.DELIVERY.ADDRESS.Room = Table.list[Colomn_N.APPARTEMENT_NO, i];
 
             //CONTACT
+            Con.CONTACT.PhonePrefix = Params.Const.PhonePrefix;
+            Con.CONTACT.Phone = Params.Const.Phone;
+            Con.CONTACT.FaxPrefix = Params.Const.FaxPrefix;
+            Con.CONTACT.Fax = Params.Const.Fax;
+            Con.CONTACT.EMail = Params.Const.EMail;
+            Con.CONTACT.PagerOperatorPrefix = Params.Const.PagerOperatorPrefix;
+            Con.CONTACT.PagerOperator = Params.Const.PagerOperator;
+            Con.CONTACT.PagerAbonent = Params.Const.PagerAbonent;
+            Con.CONTACT.Notes = Params.Const.Contact_Notes;
 
+            //CONTACT.PERSONNAME
+            Con.CONTACT.PERSONNAME.SEXTYPESId = Table.list[Colomn_N.GENDER, i] == "м" ? "0" : "1"; // Проверить женский пол
+            Con.CONTACT.PERSONNAME.LastName = Table.list[Colomn_N.LAST_N, i] + " " + Table.list[Colomn_N.FIRST_N, i][0] + "." + Table.list[Colomn_N.PATRONYME, i][0] + ".";
+            Con.CONTACT.PERSONNAME.FirstName = Params.Const.CP_FirstName;
+            Con.CONTACT.PERSONNAME.SecondName = Params.Const.CP_SecondName;
 
+            //CONNECTIONS.CONNECTION
+            Con.CONNECTIONS.CONNECTION.PAYSYSTEMSId = Params.Const.PAYSYSTEMSId;
+            Con.CONNECTIONS.CONNECTION.BILLCYCLESId = Params.Const.BILLCYCLESId;
+            Con.CONNECTIONS.CONNECTION.CELLNETSId = Params.Const.CELLNETSId;
+            Con.CONNECTIONS.CONNECTION.PRODUCTSId = Params.Const.PRODUCTSId;
+            Con.CONNECTIONS.CONNECTION.PhoneOwner = Params.Const.PhoneOwner;
+            Con.CONNECTIONS.CONNECTION.SerNumber = Params.Const.SerNumber;
+            Con.CONNECTIONS.CONNECTION.SimLock = Params.Const.SimLock;
+            Con.CONNECTIONS.CONNECTION.IMSI = Table.list[Colomn_N.IMSI, i];
 
+            //CONNECTIONS.CONNECTION.MOBILES.MOBILE
+            Con.CONNECTIONS.CONNECTION.MOBILES.MOBILE.CHANNELTYPESId = Params.Const.CHANNELTYPESId;
+            Con.CONNECTIONS.CONNECTION.MOBILES.MOBILE.CHANNELLENSId = Params.Const.CHANNELLENSId;
+            Con.CONNECTIONS.CONNECTION.MOBILES.MOBILE.SNB = Table.list[Colomn_N.CTN, i];
+            Con.CONNECTIONS.CONNECTION.MOBILES.MOBILE.BILLPLANSId = Table.list[Colomn_N.BILLPLANSId, i];
+            Con.CONNECTIONS.CONNECTION.MOBILES.MOBILE.SERVICES = Table.ListFromCell(Colomn_N.SERVICES, i, ' ');
 
+            //LOGPARAMS
+            Con.LOGPARAMS.AddRange(Params.Const.LOGPARAMS);
 
             return Con;
         }
+
+
 
         private void button2_Click(object sender, EventArgs e)
         {

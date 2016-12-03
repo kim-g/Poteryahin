@@ -26,5 +26,8 @@
         public byte BUILDING_NO;
         public byte APARTTYPE;
         public byte APPARTEMENT_NO;
+        public byte IMSI;
+        public byte BILLPLANSId;
+        public byte SERVICES;
     }
 }
