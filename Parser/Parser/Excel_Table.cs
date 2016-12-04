@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Parser
@@ -29,14 +30,34 @@ namespace Parser
             var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);// Находим последнюю ячейку.
             ET.Table_Width = lastCell.Column;
             ET.Table_Height = lastCell.Row;
+
+            // Настройка прогрессбара
+            Progress.Maximum = ET.Table_Width * ET.Table_Height + 2 * ET.Table_Height;
+            Progress.Process = "Считывание данных из Excel";
+
             ET.list = new string[ET.Table_Width, ET.Table_Height]; // массив значений с листа равен по размеру листу
             for (int i = 0; i < ET.Table_Width; i++) //по всем колонкам
                 for (int j = 1; j < ET.Table_Height; j++) // по всем строкам
+                {
                     ET.list[i, j] = ObjWorkSheet.Cells[j + 1, i + 1].Text.ToString();//считываем текст в строку
+                    Progress.Position++;
+                    Application.DoEvents();
+
+                    if (Progress.Abort)
+                    {
+                        ObjWorkBook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя
+
+                        //Удаляем приложение (выходим из экселя) - а то будет висеть в процессах!
+                        ObjExcel.Quit();
+                        return ET;
+                    }
+                }
             ObjWorkBook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя
 
             //Удаляем приложение (выходим из экселя) - а то будет висеть в процессах!
             ObjExcel.Quit();
+
+            Progress.Done = ET.Table_Width * ET.Table_Height;
 
             return ET;
         }

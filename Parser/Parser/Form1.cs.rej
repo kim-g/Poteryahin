@@ -1,0 +1,41 @@
+diff a/Parser/Parser/Form1.cs b/Parser/Parser/Form1.cs	(rejected hunks)
+@@ -17,5 +17,39 @@
+         {
+             InitializeComponent();
+         }
++
++        private void button1_Click(object sender, EventArgs e)
++        {
++            //Открываем файл Экселя
++            if (openFileDialog1.ShowDialog() == DialogResult.OK)
++            {
++                //Создаём приложение.
++                Excel.Application ObjExcel = new Microsoft.Office.Interop.Excel.Application();
++                //Открываем книгу.                                                                                                                                                        
++                Excel.Workbook ObjWorkBook = ObjExcel.Workbooks.Open(openFileDialog1.FileName, 0, false, 5, "", "", false, Excel.XlPlatform.xlWindows, "", true, false, 0, true, false, false);
++                //Выбираем таблицу(лист).
++                Excel.Worksheet ObjWorkSheet;
++                ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1];
++
++                //Очищаем от старого текста окно вывода.
++                richTextBox1.Clear();
++
++                var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);//1 ячейку
++                int Table_Width = lastCell.Column;
++                int Table_Height = lastCell.Row;
++                string[,] list = new string[Table_Width, Table_Height]; // массив значений с листа равен по размеру листу
++                for (int i = 0; i < Table_Width; i++) //по всем колонкам
++                    for (int j = 0; j < Table_Height; j++) // по всем строкам
++                        list[i, j] = ObjWorkSheet.Cells[j + 1, i + 1].Text.ToString();//считываем текст в строку
++                ObjWorkBook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя
++                GC.Collect(); // убрать за собой
++                for (int i = 0; i < Table_Width; i++) //по всем колонкам
++                    for (int j = 0; j < Table_Height; j++) // по всем строкам 
++                        richTextBox1.Text += "\n" + list[i, j];//выводим строку
++
++                //Удаляем приложение (выходим из экселя) - а то будет висеть в процессах!
++                ObjExcel.Quit();
++            }
++        }
+     }
+ }
