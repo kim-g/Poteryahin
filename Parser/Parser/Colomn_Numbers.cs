@@ -29,5 +29,8 @@
         public byte IMSI;
         public byte BILLPLANSId;
         public byte SERVICES;
+        public byte DealerCode;
+        public byte DealerPointCode;
+        public byte DealerContractDate;
     }
 }

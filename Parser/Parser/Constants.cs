@@ -6,10 +6,7 @@ namespace Parser
     {
         // Напрямую из CONTRACT
         public string Status = "0";
-        public string DealerCode = "3T33";
-        public string DealerPointCode = "3T33001";
         public string DealerContractCode = "1063";
-        public string DealerContractDate = "2016-04-23";
         public string ABSContractCode = "";
         public string BANKPROPLIST = "";
         public string Comments = "";

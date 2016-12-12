@@ -60,6 +60,23 @@ namespace Parser
             //Вычисление времени работы. Начальная точка
             DateTime StartTime = DateTime.Now;
 
+
+            //Загрузка номеров строк
+            Colomn_Numbers Colomn_N = (Colomn_Numbers)Serializer.LoadFromXML("Colomns.xml", typeof(Colomn_Numbers));
+
+            // Загрузка констант из файла
+            Editable_Params Params = (Editable_Params)Serializer.LoadFromXML("Parameters.xml", typeof(Editable_Params));
+            if (Progress.Abort)
+            {
+                Stop();
+                return;
+            }
+
+            // Запросим DealerContractCode
+            string DCC = Input_String.GetString("DealerContractCode", "Введите начальный DealerContractCode:", Convert.ToInt32(Params.Const.DealerContractCode));
+            if (DCC == "@Cancel@") { Stop(); return; }
+            Params.Const.DealerContractCode = DCC;
+
             // Создание массива
             Contracts = new List<CONTRACT>();
 
@@ -79,17 +96,6 @@ namespace Parser
             catch (Exception)
             {
                 MessageBox.Show("Ошибка открытия файла «" + ExcelFileName + "»", "Ошибка");
-                return;
-            }
-
-            //Загрузка номеров строк
-            Colomn_Numbers Colomn_N = (Colomn_Numbers)Serializer.LoadFromXML("Colomns.xml", typeof(Colomn_Numbers));
-
-            // Загрузка констант из файла
-            Editable_Params Params = (Editable_Params)Serializer.LoadFromXML("Parameters.xml", typeof(Editable_Params));
-            if (Progress.Abort)
-            {
-                Stop();
                 return;
             }
 
@@ -116,7 +122,8 @@ namespace Parser
             Progress.Process = "Экспорт данных в XML";
             for (int i = 0; i < Contracts.Count; i++)
             {
-                File.WriteAllText(OutputDirectory + "\\Card_" + i.ToString("D8") + ".xml", Contracts[i].ToXMLString(Example), Encoding.GetEncoding("Windows-1251"));
+                File.WriteAllText(OutputDirectory + "\\" + Contracts[i].DealerCode + "_" + Contracts[i].DealerPointCode + "_" + Contracts[i].DealerContractCode + ".xml", 
+                    Contracts[i].ToXMLString(Example), Encoding.GetEncoding("Windows-1251"));
                 Progress.Position = Progress.Done + i;
                 Application.DoEvents();
                 if (Progress.Abort)
@@ -125,6 +132,10 @@ namespace Parser
                     return;
                 }
             }
+
+            // Запишем последнее значение DealerContractCode + 1
+            Params.Const.DealerContractCode = (Convert.ToInt32(Params.Const.DealerContractCode) + Contracts.Count).ToString();
+            Params.SaveToXML("Parameters.xml");
 
             DateTime EndTime = DateTime.Now;
             TimeSpan period = EndTime - StartTime;
@@ -154,10 +165,10 @@ namespace Parser
 
             // Заполнение
             Con.Status = Params.Const.Status;
-            Con.DealerCode = Params.Const.DealerCode;
-            Con.DealerPointCode = Params.Const.DealerPointCode;
-            Con.DealerContractCode = Params.Const.DealerContractCode;
-            Con.DealerContractDate = Params.Const.DealerContractDate;
+            Con.DealerCode = Table.list[Colomn_N.DealerCode, i];
+            Con.DealerPointCode = Table.list[Colomn_N.DealerPointCode, i];
+            Con.DealerContractCode = (Convert.ToInt32(Params.Const.DealerContractCode) + i - 1).ToString();
+            Con.DealerContractDate = ToCompDate(Table.list[Colomn_N.DealerContractDate, i]);
             Con.ABSContractCode = Params.Const.ABSContractCode;
             Con.BANKPROPLIST = Params.Const.BANKPROPLIST;
             Con.Comments = Params.Const.Comments;
