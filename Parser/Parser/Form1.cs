@@ -159,7 +159,8 @@ namespace Parser
             button4.Visible = false;
         }
 
-        private CONTRACT GetContract(Excel_Table Table, int i, Editable_Params Params, Colomn_Numbers Colomn_N)
+        // Получить список контактов
+	private CONTRACT GetContract(Excel_Table Table, int i, Editable_Params Params, Colomn_Numbers Colomn_N)
         {
             CONTRACT Con = new CONTRACT();
 
