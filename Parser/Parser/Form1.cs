@@ -274,6 +274,7 @@ namespace Parser
             return Con;
         }
 
+		// В компьютерный формат даты
         private string ToCompDate(string HumanDate)
         {
             return HumanDate.Substring(6, 4) + "-" + HumanDate.Substring(3, 2) + "-" + HumanDate.Substring(0, 2);
