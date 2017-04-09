@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 
-namespace Parser
+namespace TableParser
 {
     public class Excel_Table
     {
