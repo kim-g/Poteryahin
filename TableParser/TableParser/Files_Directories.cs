@@ -9,17 +9,35 @@ namespace TableParser
 {
     class Files_Directories
     {
-        public static string OpenFile(string Filter= "Все файлы (*.*)|*.*")
+        public static string OpenFile(string Title, string Filter= "Все файлы (*.*)|*.*")
         {
             using (var ofd = new OpenFileDialog())
             {
+                ofd.Title = Title;
                 ofd.Filter = Filter;
                 ofd.AddExtension = true;
+                ofd.Multiselect = false;
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     return ofd.FileName;
                 }
-                return "<Cancel>";
+                return null;
+            }
+        }
+
+        public static string[] OpenFiles(string Title, string Filter = "Все файлы (*.*)|*.*")
+        {
+            using (var ofd = new OpenFileDialog())
+            {
+                ofd.Title = Title;
+                ofd.Filter = Filter;
+                ofd.AddExtension = true;
+                ofd.Multiselect = true;
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    return ofd.FileNames;
+                }
+                return null;
             }
         }
 
@@ -27,7 +45,7 @@ namespace TableParser
         {
             FolderBrowserDialog directoryDialog = new FolderBrowserDialog();
             directoryDialog.ShowDialog();
-            return directoryDialog.SelectedPath == "" ? "<Cancel>" : directoryDialog.SelectedPath;
+            return directoryDialog.SelectedPath == "" ? null : directoryDialog.SelectedPath;
         }
     }
 }

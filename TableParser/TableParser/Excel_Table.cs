@@ -13,6 +13,13 @@ namespace TableParser
         public int Table_Width;
         public int Table_Height;
 
+        public Excel_Table(int Width, int Height)
+        {
+            Table_Width = Width;
+            Table_Height = Height;
+            list = new string[Table_Width, Table_Height];
+        }
+
         public static Excel_Table LoadFromFile(string FileName)
         {
             //Открываем файл Экселя
@@ -23,21 +30,18 @@ namespace TableParser
             //Выбираем таблицу(лист).
             Excel.Worksheet ObjWorkSheet;
             ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1];
-
-            // Создаём новый Excel_Table объект
-            Excel_Table ET = new Excel_Table();
-
+            
             var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);// Находим последнюю ячейку.
-            ET.Table_Width = lastCell.Column;
-            ET.Table_Height = lastCell.Row;
+            
+            // Создаём новый Excel_Table объект
+            Excel_Table ET = new Excel_Table(lastCell.Column, lastCell.Row);
 
             // Настройка прогрессбара
             Progress.Maximum = ET.Table_Width * ET.Table_Height + 2 * ET.Table_Height;
             Progress.Process = "Считывание данных из Excel";
 
-            ET.list = new string[ET.Table_Width, ET.Table_Height]; // массив значений с листа равен по размеру листу
             for (int i = 0; i < ET.Table_Width; i++) //по всем колонкам
-                for (int j = 1; j < ET.Table_Height; j++) // по всем строкам
+                for (int j = 0; j < ET.Table_Height; j++) // по всем строкам
                 {
                     ET.list[i, j] = ObjWorkSheet.Cells[j + 1, i + 1].Text.ToString();//считываем текст в строку
                     Progress.Position++;
@@ -62,10 +66,118 @@ namespace TableParser
             return ET;
         }
 
+        private string[] RemoveDouble(string[] In)
+        {
+            var hashset = new HashSet<string>(); //Создаём объект типа множество.
+
+            foreach (var x in In) // Проходимся по массиву и добавляем только те элементы, которых во множестве ещё нет
+            {
+                if (x == "") continue;
+                if (!hashset.Contains(x))
+                    hashset.Add(x);
+            }
+
+            Array.Resize(ref In, hashset.Count); // Изменяем размерность массива на необходимую
+            In = hashset.ToArray(); // Перебрасываем элементы из множества обратно в массив
+            return In;
+        }
+
+        public int RowsCount(string Filter="*", int Colomn=0)
+        {
+            if (Filter == "*") return Table_Height;
+
+            int Count = 0;
+            for (int i=0; i < Table_Height; i++)
+                 if (list[Colomn, i] == Filter) Count++;
+            return Count;
+        }
+
+        public Excel_Table CopyRows( string Filters = "*", int Colomn = 0)
+        {
+            string[] FilterList = Filters.Split(';');   // Разделяем фильтры
+            FilterList = RemoveDouble(FilterList); // Удалим повторы
+
+            // Подсчитываем количество подходящих строк
+            int Count = 0;
+            for (int i = 0; i < FilterList.Count(); i++)
+                Count += RowsCount(FilterList[i], Colomn);
+
+            //Создаём новую таблицу
+            Excel_Table FilteredTable = new Excel_Table(Table_Width, Count);
+
+            int FT_Pos = 0;
+            // и скопируем все подходящие данные в новую таблицу
+            for (int i = 0; i < Table_Height; i++)
+                for (int j = 0; j < FilterList.Count(); j++)
+                    if (list[Colomn, i] == FilterList[j])
+                    {
+                        for (int k = 0; k < Table_Width; k++)
+                            FilteredTable.list[k, FT_Pos] = list[k, i];
+                        FT_Pos++;
+                    }
+
+            return FilteredTable;
+        }
+
 
         public List<string> ListFromCell(int i, int j, char Spacer)
         {
             return (List<string>)list[i, j].Split(Spacer).ToList();
+        }
+
+        public void SaveToFile(string FileName)
+        {
+            //Открываем файл Экселя
+            //Создаём приложение.
+            Excel.Application ObjExcel = new Excel.Application();
+            ObjExcel.SheetsInNewWorkbook = 1;
+            //Создаём книгу.                                                                                                                                                        
+            ObjExcel.Workbooks.Add(Type.Missing);
+            //Получаем набор ссылок на объекты Workbook (на созданные книги)
+            Excel.Workbooks excelappworkbooks;
+            Excel.Workbook excelappworkbook;
+            excelappworkbooks = ObjExcel.Workbooks;
+            //Получаем ссылку на книгу 1 - нумерация от 1
+            excelappworkbook = excelappworkbooks[1];
+            //Запроса на сохранение для книги не должно быть
+            excelappworkbook.Saved = true;
+            // Формат 
+            ObjExcel.DefaultSaveFormat = Excel.XlFileFormat.xlOpenXMLWorkbook;
+
+            // Ищем нужные листы
+            Excel.Sheets excelsheets;
+            Excel.Worksheet excelworksheet;
+
+            excelsheets = excelappworkbook.Worksheets;
+            //Получаем ссылку на лист 1
+            excelworksheet = (Excel.Worksheet)excelsheets.get_Item(1);
+            Excel.Range excelcells = excelworksheet.get_Range("A1", Type.Missing);
+
+            for (int i = 0; i < Table_Width; i++)
+            {
+                for (int j = 0; j < Table_Height; j++)
+                {
+                    excelcells.Value2 = list[i, j];
+                    excelcells = excelcells.Offset[1, 0];
+                }
+                excelcells = excelcells.Offset[0 - Table_Width, 1];
+            }
+            excelappworkbook.SaveAs(FileName,  //object Filename
+            Excel.XlFileFormat.xlOpenXMLWorkbook, //object FileFormat
+            Type.Missing,                       //object Password 
+            Type.Missing,                       //object WriteResPassword  
+            Type.Missing,                       //object ReadOnlyRecommended
+            Type.Missing,                       //object CreateBackup
+            Excel.XlSaveAsAccessMode.xlNoChange,//XlSaveAsAccessMode AccessMode
+            Type.Missing,                       //object ConflictResolution
+            Type.Missing,                       //object AddToMru 
+            Type.Missing,                       //object TextCodepage
+            Type.Missing,                       //object TextVisualLayout
+            Type.Missing);                      //object Local
+
+            excelappworkbook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя (уже сохранили)
+            //Удаляем приложение (выходим из экселя) - а то будет висеть в процессах!
+            ObjExcel.Quit();
         }
     }
 }
