@@ -97,10 +97,26 @@ namespace TableParser
             string[] FilterList = Filters.Split(';');   // Разделяем фильтры
             FilterList = RemoveDouble(FilterList); // Удалим повторы
 
-            // Подсчитываем количество подходящих строк
+            List<int> RowsCopy = new List<int>();
             int Count = 0;
-            for (int i = 0; i < FilterList.Count(); i++)
-                Count += RowsCount(FilterList[i], Colomn);
+            foreach (string Filter in FilterList)
+            {
+                if (Filter == "*")
+                {
+                    Count += Table_Height;
+                    continue;
+                }
+
+                for (int i = 0; i < Table_Height; i++)
+                    for (int j = 0; j < Table_Width; j++)
+                    {
+                        if (list[Colomn, i] == Filter)
+                        {
+                            RowsCopy.Add(i);
+                            break;
+                        }
+                    }
+            }
 
             //Создаём новую таблицу
             Excel_Table FilteredTable = new Excel_Table(Table_Width, Count);
