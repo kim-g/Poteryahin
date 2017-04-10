@@ -13,6 +13,7 @@ namespace TableParser
         public int Table_Width;
         public int Table_Height;
 
+
         public Excel_Table(int Width, int Height)
         {
             Table_Width = Width;
@@ -92,7 +93,7 @@ namespace TableParser
             return Count;
         }
 
-        public Excel_Table CopyRows( string Filters = "*", int Colomn = 0)
+        public Excel_Table CopyRows( string Filters = "*", int Colomn = 0, int Head = 0)
         {
             string[] FilterList = Filters.Split(';');   // Разделяем фильтры
             FilterList = RemoveDouble(FilterList); // Удалим повторы
@@ -103,11 +104,18 @@ namespace TableParser
                 Count += RowsCount(FilterList[i], Colomn);
 
             //Создаём новую таблицу
-            Excel_Table FilteredTable = new Excel_Table(Table_Width, Count);
+            Excel_Table FilteredTable = new Excel_Table(Table_Width, Count + Head);
 
             int FT_Pos = 0;
+            // Скопируем шапку
+            for (int i = 0; i < Head; i++)
+            {
+                for (int k = 0; k < Table_Width; k++)
+                    FilteredTable.list[k, FT_Pos] = list[k, i];
+                FT_Pos++;
+            }
             // и скопируем все подходящие данные в новую таблицу
-            for (int i = 0; i < Table_Height; i++)
+            for (int i = Head; i < Table_Height; i++)
                 for (int j = 0; j < FilterList.Count(); j++)
                     if (list[Colomn, i] == FilterList[j])
                     {
@@ -160,7 +168,7 @@ namespace TableParser
                     excelcells.Value2 = list[i, j];
                     excelcells = excelcells.Offset[1, 0];
                 }
-                excelcells = excelcells.Offset[0 - Table_Width, 1];
+                excelcells = excelcells.Offset[0 - Table_Height, 1];
             }
             excelappworkbook.SaveAs(FileName,  //object Filename
             Excel.XlFileFormat.xlOpenXMLWorkbook, //object FileFormat

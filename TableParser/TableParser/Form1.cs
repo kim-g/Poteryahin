@@ -12,6 +12,8 @@ namespace TableParser
 {
     public partial class Form1 : Form
     {
+        Config config = (Config)Serializer.LoadFromXML("config.xml", typeof(Config));
+
         public Form1()
         {
             InitializeComponent();
@@ -57,7 +59,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ''AS IS'' AN
                 string FilterList = "";
                 for (int j = 0; j < FilterTables[i].Table_Height; j++)
                     FilterList += FilterTables[i].list[0, j] + ";";
-                Excel_Table Res = Data.CopyRows(FilterList, 2);
+                Excel_Table Res = Data.CopyRows(FilterList, config.Colomn, config.HeadRows);
                 Res.SaveToFile(@"D:\Temp\Test.xlsx");
             }
 
