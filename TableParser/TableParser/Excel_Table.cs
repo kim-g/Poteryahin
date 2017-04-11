@@ -25,7 +25,7 @@ namespace TableParser
         {
             //Открываем файл Экселя
             //Создаём приложение.
-            Excel.Application ObjExcel = new Microsoft.Office.Interop.Excel.Application();
+            Excel.Application ObjExcel = new Excel.Application();
             //Открываем книгу.                                                                                                                                                        
             Excel.Workbook ObjWorkBook = ObjExcel.Workbooks.Open(FileName, 0, false, 5, "", "", false, Excel.XlPlatform.xlWindows, "", true, false, 0, true, false, false);
             //Выбираем таблицу(лист).
@@ -98,20 +98,23 @@ namespace TableParser
             string[] FilterList = Filters.Split(';');   // Разделяем фильтры
             FilterList = RemoveDouble(FilterList); // Удалим повторы
 
+            // Создаём список копируемых строк
             List<int> RowsCopy = new List<int>();
-            int Count = 0;
+
+            // Копируем все заголовочные строки
+            for (int i = 0; i < Head; i++)
+            {
+                RowsCopy.Add(i);
+            }
+
+            // Ищем совпадения по всем ячейкам
             foreach (string Filter in FilterList)
             {
-                if (Filter == "*")
-                {
-                    Count += Table_Height;
-                    continue;
-                }
-
                 for (int i = 0; i < Table_Height; i++)
                     for (int j = 0; j < Table_Width; j++)
                     {
-                        if (list[Colomn, i] == Filter)
+                        // Если находим или если фильтр *, то помечаем строку как готовую к копированию и выходим.
+                        if ((list[j, i] == Filter) || (Filter == "*"))
                         {
                             RowsCopy.Add(i);
                             break;
@@ -120,25 +123,14 @@ namespace TableParser
             }
 
             //Создаём новую таблицу
-            Excel_Table FilteredTable = new Excel_Table(Table_Width, Count + Head);
+            Excel_Table FilteredTable = new Excel_Table(Table_Width, RowsCopy.Count);
 
-            int FT_Pos = 0;
-            // Скопируем шапку
-            for (int i = 0; i < Head; i++)
-            {
-                for (int k = 0; k < Table_Width; k++)
-                    FilteredTable.list[k, FT_Pos] = list[k, i];
-                FT_Pos++;
-            }
             // и скопируем все подходящие данные в новую таблицу
-            for (int i = Head; i < Table_Height; i++)
-                for (int j = 0; j < FilterList.Count(); j++)
-                    if (list[Colomn, i] == FilterList[j])
-                    {
-                        for (int k = 0; k < Table_Width; k++)
-                            FilteredTable.list[k, FT_Pos] = list[k, i];
-                        FT_Pos++;
-                    }
+            for (int i = 0; i < RowsCopy.Count; i++)
+            {
+                for (int j = 0; j < Table_Width; j++)
+                    FilteredTable.list[j, i] = list[j, RowsCopy[i]];
+            }
 
             return FilteredTable;
         }
