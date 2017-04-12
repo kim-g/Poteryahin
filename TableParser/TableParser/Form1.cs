@@ -39,6 +39,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ''AS IS'' AN
 
         private void button1_Click(object sender, EventArgs e)
         {
+            button1.Enabled = false;
+            button4.Enabled = false;
             // Получаем данные о файлах
             string FileToOpen = Files_Directories.OpenFile("Открыть файл с исходными данными", "Файлы Excel (*.xlsx, *.xls)|*.xlsx;*.xls|Все файлы (*.*)|*.*");
             if (FileToOpen == null) return;
@@ -83,6 +85,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ''AS IS'' AN
 
             Progress.Counting = false;
             MessageBox.Show("Задание выполнено");
+            button1.Enabled = true;
+            button4.Enabled = true;
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -114,7 +118,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ''AS IS'' AN
             {
                 Progress.Counting = false;
                 Progress.Abort = true;
+                button1.Enabled = true;
+                button4.Enabled = true;
             }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Licence();
         }
     }
 }
