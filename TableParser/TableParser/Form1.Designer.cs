@@ -36,6 +36,7 @@
             this.PBAL = new System.Windows.Forms.Label();
             this.PBA = new System.Windows.Forms.ProgressBar();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.button2 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,13 +53,14 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.button2);
             this.panel1.Controls.Add(this.PBA);
             this.panel1.Controls.Add(this.PBAL);
             this.panel1.Controls.Add(this.PBC);
             this.panel1.Controls.Add(this.PBCL);
             this.panel1.Location = new System.Drawing.Point(12, 78);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(401, 114);
+            this.panel1.Size = new System.Drawing.Size(401, 165);
             this.panel1.TabIndex = 1;
             this.panel1.Visible = false;
             // 
@@ -102,6 +104,16 @@
             this.timer1.Interval = 500;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(111, 128);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(150, 34);
+            this.button2.TabIndex = 4;
+            this.button2.Text = "Отмена";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -133,6 +145,7 @@
         private System.Windows.Forms.ProgressBar PBC;
         private System.Windows.Forms.Label PBCL;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Button button2;
     }
 }
 

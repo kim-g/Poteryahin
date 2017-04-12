@@ -48,6 +48,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ''AS IS'' AN
             if (OutDir == null) return;
 
             // Настройка ProgressBar
+            Progress.Abort = false;
             Progress.All.Position = 0;
             Progress.All.Maximum = 1 + Filters.Count() + Filters.Count();
             Progress.Counting = true;
@@ -105,6 +106,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ''AS IS'' AN
             if (PBA.Value != CurPos) PBA.Value = CurPos;
 
             if (!panel1.Visible) panel1.Visible = true;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Вы уверены, что хотите прервать процесс? Отменить это действие будет невозможно!", "Прервать процесс", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                Progress.Counting = false;
+                Progress.Abort = true;
+            }
         }
     }
 }
