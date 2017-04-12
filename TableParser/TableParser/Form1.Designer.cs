@@ -28,27 +28,98 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.button1 = new System.Windows.Forms.Button();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.PBCL = new System.Windows.Forms.Label();
+            this.PBC = new System.Windows.Forms.ProgressBar();
+            this.PBAL = new System.Windows.Forms.Label();
+            this.PBA = new System.Windows.Forms.ProgressBar();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(49, 37);
+            this.button1.Location = new System.Drawing.Point(13, 14);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(176, 23);
+            this.button1.Size = new System.Drawing.Size(400, 56);
             this.button1.TabIndex = 0;
             this.button1.Text = "Сделать мне хорошо";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.PBA);
+            this.panel1.Controls.Add(this.PBAL);
+            this.panel1.Controls.Add(this.PBC);
+            this.panel1.Controls.Add(this.PBCL);
+            this.panel1.Location = new System.Drawing.Point(12, 78);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(401, 114);
+            this.panel1.TabIndex = 1;
+            this.panel1.Visible = false;
+            // 
+            // PBCL
+            // 
+            this.PBCL.AutoSize = true;
+            this.PBCL.Location = new System.Drawing.Point(0, 0);
+            this.PBCL.Name = "PBCL";
+            this.PBCL.Size = new System.Drawing.Size(51, 20);
+            this.PBCL.TabIndex = 0;
+            this.PBCL.Text = "label1";
+            // 
+            // PBC
+            // 
+            this.PBC.Location = new System.Drawing.Point(3, 23);
+            this.PBC.Maximum = 1000;
+            this.PBC.Name = "PBC";
+            this.PBC.Size = new System.Drawing.Size(395, 23);
+            this.PBC.TabIndex = 1;
+            // 
+            // PBAL
+            // 
+            this.PBAL.AutoSize = true;
+            this.PBAL.Location = new System.Drawing.Point(0, 62);
+            this.PBAL.Name = "PBAL";
+            this.PBAL.Size = new System.Drawing.Size(53, 20);
+            this.PBAL.TabIndex = 2;
+            this.PBAL.Text = "Всего";
+            // 
+            // PBA
+            // 
+            this.PBA.Location = new System.Drawing.Point(3, 85);
+            this.PBA.Maximum = 1000;
+            this.PBA.Name = "PBA";
+            this.PBA.Size = new System.Drawing.Size(395, 23);
+            this.PBA.TabIndex = 3;
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 500;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.ClientSize = new System.Drawing.Size(426, 402);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.button1);
+            this.DoubleBuffered = true;
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Разедлитель книг Excel";
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -56,6 +127,12 @@
         #endregion
 
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.ProgressBar PBA;
+        private System.Windows.Forms.Label PBAL;
+        private System.Windows.Forms.ProgressBar PBC;
+        private System.Windows.Forms.Label PBCL;
+        private System.Windows.Forms.Timer timer1;
     }
 }
 

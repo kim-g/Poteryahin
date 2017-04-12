@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -38,14 +39,15 @@ namespace TableParser
             Excel_Table ET = new Excel_Table(lastCell.Column, lastCell.Row);
 
             // Настройка прогрессбара
-            Progress.Maximum = ET.Table_Width * ET.Table_Height + 2 * ET.Table_Height;
-            Progress.Process = "Считывание данных из Excel";
+            Progress.Current.Position = 0;
+            Progress.Current.Maximum = ET.Table_Width * ET.Table_Height + 2 * ET.Table_Height;
+            Progress.Process = "Считывание данных из файла «" + Path.GetFileName(FileName) + "»";
 
             for (int i = 0; i < ET.Table_Width; i++) //по всем колонкам
                 for (int j = 0; j < ET.Table_Height; j++) // по всем строкам
                 {
                     ET.list[i, j] = ObjWorkSheet.Cells[j + 1, i + 1].Text.ToString();//считываем текст в строку
-                    Progress.Position++;
+                    Progress.Current.Position++;
                     Application.DoEvents();
 
                     if (Progress.Abort)
@@ -62,7 +64,7 @@ namespace TableParser
             //Удаляем приложение (выходим из экселя) - а то будет висеть в процессах!
             ObjExcel.Quit();
 
-            Progress.Done = ET.Table_Width * ET.Table_Height;
+            Progress.Current.Done = ET.Table_Width * ET.Table_Height;
 
             return ET;
         }
@@ -76,6 +78,10 @@ namespace TableParser
                 if (x == "") continue;
                 if (!hashset.Contains(x))
                     hashset.Add(x);
+                if (Progress.Abort)
+                {
+                     return null;
+                }
             }
 
             Array.Resize(ref In, hashset.Count); // Изменяем размерность массива на необходимую
@@ -83,20 +89,15 @@ namespace TableParser
             return In;
         }
 
-        public int RowsCount(string Filter="*", int Colomn=0)
-        {
-            if (Filter == "*") return Table_Height;
-
-            int Count = 0;
-            for (int i=0; i < Table_Height; i++)
-                 if (list[Colomn, i] == Filter) Count++;
-            return Count;
-        }
-
-        public Excel_Table CopyRows( string Filters = "*", int Colomn = 0, int Head = 0)
+        public Excel_Table CopyRows( string Filters = "*", int Colomn = 0, int Head = 0, string FileName="")
         {
             string[] FilterList = Filters.Split(';');   // Разделяем фильтры
             FilterList = RemoveDouble(FilterList); // Удалим повторы
+
+            // Настройка прогрессбара
+            Progress.Current.Position = 0;
+            Progress.Current.Maximum = Table_Height;
+            Progress.Process = "Поиск совпадений по файлу «" + Path.GetFileName(FileName) + "»";
 
             // Создаём список копируемых строк
             List<int> RowsCopy = new List<int>();
@@ -105,12 +106,19 @@ namespace TableParser
             for (int i = 0; i < Head; i++)
             {
                 RowsCopy.Add(i);
+                Progress.Current.Position++;
+                if (Progress.Abort)
+                {
+                    return null;
+                }
             }
 
             // Ищем совпадения по всем ячейкам
             foreach (string Filter in FilterList)
             {
                 for (int i = 0; i < Table_Height; i++)
+                {
+                    Progress.Current.Position++;
                     for (int j = 0; j < Table_Width; j++)
                     {
                         // Если находим или если фильтр *, то помечаем строку как готовую к копированию и выходим.
@@ -120,6 +128,7 @@ namespace TableParser
                             break;
                         }
                     }
+                }
             }
 
             //Создаём новую таблицу
@@ -130,6 +139,10 @@ namespace TableParser
             {
                 for (int j = 0; j < Table_Width; j++)
                     FilteredTable.list[j, i] = list[j, RowsCopy[i]];
+                if (Progress.Abort)
+                {
+                    return null;
+                }
             }
 
             return FilteredTable;
@@ -143,6 +156,11 @@ namespace TableParser
 
         public void SaveToFile(string FileName)
         {
+            // Настройка прогрессбара
+            Progress.Current.Position = 0;
+            Progress.Current.Maximum = Table_Height * Table_Width;
+            Progress.Process = "Сохранение в файл «" + Path.GetFileName(FileName) + "»";
+
             //Открываем файл Экселя
             //Создаём приложение.
             Excel.Application ObjExcel = new Excel.Application();
@@ -175,6 +193,15 @@ namespace TableParser
                 {
                     excelcells.Value2 = list[i, j];
                     excelcells = excelcells.Offset[1, 0];
+                    Progress.Current.Position++;
+                    if (Progress.Abort)
+                    {
+                        excelappworkbook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя
+
+                        //Удаляем приложение (выходим из экселя) - а то будет висеть в процессах!
+                        ObjExcel.Quit();
+                        return;
+                    }
                 }
                 excelcells = excelcells.Offset[0 - Table_Height, 1];
             }

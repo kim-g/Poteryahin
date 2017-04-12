@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,11 +47,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ''AS IS'' AN
             string OutDir = Files_Directories.OpenDirectory();
             if (OutDir == null) return;
 
+            // Настройка ProgressBar
+            Progress.All.Position = 0;
+            Progress.All.Maximum = 1 + Filters.Count() + Filters.Count();
+            Progress.Counting = true;
+
             // Загружаем файлы в RAM
             Excel_Table Data = Excel_Table.LoadFromFile(FileToOpen);
+            if (Progress.Abort) return;
+            Progress.All.Position++;
             List<Excel_Table> FilterTables = new List<Excel_Table>();
             for (int i = 0; i < Filters.Count(); i++)
+            {
                 FilterTables.Add(Excel_Table.LoadFromFile(Filters[i]));
+                if (Progress.Abort) return;
+                Progress.All.Position++;
+            }
+
+            
 
             // Обработка фильтров
             for (int i = 0; i < Filters.Count(); i++)
@@ -59,11 +73,38 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ''AS IS'' AN
                 string FilterList = "";
                 for (int j = 0; j < FilterTables[i].Table_Height; j++)
                     FilterList += FilterTables[i].list[0, j] + ";";
+                if (Progress.Abort) return;
                 Excel_Table Res = Data.CopyRows(FilterList, config.Colomn, config.HeadRows);
-                Res.SaveToFile(@"D:\Temp\Test.xlsx");
+                if (Progress.Abort) return;
+                Res.SaveToFile(OutDir+@"\"+ Path.GetFileNameWithoutExtension(Filters[i]) + "_OUT.xlsx");
+                Progress.All.Position++;
             }
 
+            Progress.Counting = false;
             MessageBox.Show("Задание выполнено");
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (!Progress.Counting)
+            {
+                if (panel1.Visible) panel1.Visible = false;
+                return;
+            }
+
+            if (PBCL.Text != Progress.Process) PBCL.Text = Progress.Process;
+
+            double CurPosDouble = (double)Progress.Current.Position / (double)Progress.Current.Maximum * 1000f;
+            int CurPos = (int)Math.Round(CurPosDouble);
+
+            if (PBC.Value != CurPos) PBC.Value = CurPos;
+
+            CurPosDouble = (double)Progress.All.Position / (double)Progress.All.Maximum * 1000f;
+            CurPos = (int)Math.Round(CurPosDouble);
+
+            if (PBA.Value != CurPos) PBA.Value = CurPos;
+
+            if (!panel1.Visible) panel1.Visible = true;
         }
     }
 }
