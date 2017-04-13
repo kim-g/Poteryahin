@@ -75,7 +75,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ''AS IS'' AN
                 // Формируем список фильтров
                 string FilterList = "";
                 for (int j = 0; j < FilterTables[i].Table_Height; j++)
-                    FilterList += FilterTables[i].list[0, j] + ";";
+                    FilterList += FilterTables[i].Data.Rows[j].ItemArray[0] + ";";
                 if (Progress.Abort) return;
                 Excel_Table Res = Data.CopyRows(FilterList, config.Colomn, config.HeadRows);
                 if (Progress.Abort) return;
@@ -102,12 +102,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ''AS IS'' AN
             double CurPosDouble = (double)Progress.Current.Position / (double)Progress.Current.Maximum * 1000f;
             int CurPos = (int)Math.Round(CurPosDouble);
 
-            if (PBC.Value != CurPos) PBC.Value = CurPos;
+            if (PBC.Value != CurPos) PBC.Value = CurPos < 1000 ? CurPos : 1000;
 
             CurPosDouble = (double)Progress.All.Position / (double)Progress.All.Maximum * 1000f;
             CurPos = (int)Math.Round(CurPosDouble);
 
-            if (PBA.Value != CurPos) PBA.Value = CurPos;
+            if (PBA.Value != CurPos) PBA.Value = CurPos < 1000 ? CurPos : 1000;
 
             if (!panel1.Visible) panel1.Visible = true;
         }

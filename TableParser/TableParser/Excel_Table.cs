@@ -1,16 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Data;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace TableParser
 {
     public class Excel_Table
     {
 
-        public string[,] list;
+        //public string[,] list;
+        public DataTable Data;
         public int Table_Width;
         public int Table_Height;
 
@@ -19,7 +25,61 @@ namespace TableParser
         {
             Table_Width = Width;
             Table_Height = Height;
-            list = new string[Table_Width, Table_Height];
+            //list = new string[Table_Width, Table_Height];
+        }
+
+        public void ReadToDataTable(string FileName)
+        {
+            DataTable dt = new DataTable();
+
+            using (SpreadsheetDocument spreadSheetDocument = SpreadsheetDocument.Open(FileName, false))
+            {
+
+                WorkbookPart workbookPart = spreadSheetDocument.WorkbookPart;
+                IEnumerable<Sheet> sheets = spreadSheetDocument.WorkbookPart.Workbook.GetFirstChild<Sheets>().Elements<Sheet>();
+                string relationshipId = sheets.First().Id.Value;
+                WorksheetPart worksheetPart = (WorksheetPart)spreadSheetDocument.WorkbookPart.GetPartById(relationshipId);
+                Worksheet workSheet = worksheetPart.Worksheet;
+                SheetData sheetData = workSheet.GetFirstChild<SheetData>();
+                IEnumerable<Row> rows = sheetData.Descendants<Row>();
+
+                for (int i=0; i < Table_Width; i++)
+                {
+                    dt.Columns.Add();
+                }
+
+                foreach (Row row in rows) //this will also include your header row...
+                {
+                    DataRow tempRow = dt.NewRow();
+
+                    for (int i = 0; i < row.Descendants<Cell>().Count(); i++)
+                    {
+                        tempRow[i] = GetCellValue(spreadSheetDocument, row.Descendants<Cell>().ElementAt(i));
+                        Progress.Current.Position++;
+                    }
+
+                    dt.Rows.Add(tempRow);
+                }
+
+            }
+            //dt.Rows.RemoveAt(0); //...so i'm taking it out here.
+            Data = dt;
+        }
+
+
+        public static string GetCellValue(SpreadsheetDocument document, Cell cell)
+        {
+            SharedStringTablePart stringTablePart = document.WorkbookPart.SharedStringTablePart;
+            string value = cell.CellValue == null ? " " : cell.CellValue.InnerXml;
+
+            if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+            {
+                return stringTablePart.SharedStringTable.ChildElements[Int32.Parse(value)].InnerText;
+            }
+            else
+            {
+                return value;
+            }
         }
 
         public static Excel_Table LoadFromFile(string FileName)
@@ -34,35 +94,24 @@ namespace TableParser
             ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1];
             
             var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);// Находим последнюю ячейку.
-            
+
             // Создаём новый Excel_Table объект
+            Progress.Process = "Выделение памяти для чтения файла «" + Path.GetFileName(FileName) + "»";
+            Application.DoEvents();
             Excel_Table ET = new Excel_Table(lastCell.Column, lastCell.Row);
 
             // Настройка прогрессбара
             Progress.Current.Position = 0;
-            Progress.Current.Maximum = ET.Table_Width * ET.Table_Height + 2 * ET.Table_Height;
+            Progress.Current.Maximum = ET.Table_Width * ET.Table_Height;
             Progress.Process = "Считывание данных из файла «" + Path.GetFileName(FileName) + "»";
 
-            for (int i = 0; i < ET.Table_Width; i++) //по всем колонкам
-                for (int j = 0; j < ET.Table_Height; j++) // по всем строкам
-                {
-                    ET.list[i, j] = ObjWorkSheet.Cells[j + 1, i + 1].Text.ToString();//считываем текст в строку
-                    Progress.Current.Position++;
-                    Application.DoEvents();
 
-                    if (Progress.Abort)
-                    {
-                        ObjWorkBook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя
-
-                        //Удаляем приложение (выходим из экселя) - а то будет висеть в процессах!
-                        ObjExcel.Quit();
-                        return ET;
-                    }
-                }
             ObjWorkBook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя
 
             //Удаляем приложение (выходим из экселя) - а то будет висеть в процессах!
             ObjExcel.Quit();
+
+            ET.ReadToDataTable(FileName);
 
             Progress.Current.Done = ET.Table_Width * ET.Table_Height;
 
@@ -107,6 +156,7 @@ namespace TableParser
             {
                 RowsCopy.Add(i);
                 Progress.Current.Position++;
+                Application.DoEvents();
                 if (Progress.Abort)
                 {
                     return null;
@@ -116,13 +166,14 @@ namespace TableParser
             // Ищем совпадения по всем ячейкам
             foreach (string Filter in FilterList)
             {
-                for (int i = 0; i < Table_Height; i++)
+                for (int i = 0; i < Data.Rows.Count; i++)
                 {
                     Progress.Current.Position++;
-                    for (int j = 0; j < Table_Width; j++)
+                    Application.DoEvents();
+                    for (int j = 0; j < Data.Columns.Count; j++)
                     {
                         // Если находим или если фильтр *, то помечаем строку как готовую к копированию и выходим.
-                        if ((list[j, i] == Filter) || (Filter == "*"))
+                        if ((Data.Rows[i].ItemArray[j].ToString()== Filter) || (Filter == "*"))
                         {
                             RowsCopy.Add(i);
                             break;
@@ -133,12 +184,18 @@ namespace TableParser
 
             //Создаём новую таблицу
             Excel_Table FilteredTable = new Excel_Table(Table_Width, RowsCopy.Count);
+            FilteredTable.Data = new DataTable();
+            for (int i = 0; i < Data.Columns.Count; i++)
+                FilteredTable.Data.Columns.Add(Data.Columns[i].Caption);
 
             // и скопируем все подходящие данные в новую таблицу
             for (int i = 0; i < RowsCopy.Count; i++)
             {
-                for (int j = 0; j < Table_Width; j++)
-                    FilteredTable.list[j, i] = list[j, RowsCopy[i]];
+                DataRow tempRow = FilteredTable.Data.NewRow();
+                for (int j=0; j < Data.Columns.Count; j++)
+                    tempRow[j] = Data.Rows[RowsCopy[i]].ItemArray[j];
+                FilteredTable.Data.Rows.Add(tempRow);
+                Application.DoEvents();
                 if (Progress.Abort)
                 {
                     return null;
@@ -151,7 +208,7 @@ namespace TableParser
 
         public List<string> ListFromCell(int i, int j, char Spacer)
         {
-            return (List<string>)list[i, j].Split(Spacer).ToList();
+            return (List<string>)Data.Rows[i][j].ToString().Split(Spacer).ToList();
         }
 
         public void SaveToFile(string FileName)
@@ -187,13 +244,14 @@ namespace TableParser
             excelworksheet = (Excel.Worksheet)excelsheets.get_Item(1);
             Excel.Range excelcells = excelworksheet.get_Range("A1", Type.Missing);
 
-            for (int i = 0; i < Table_Width; i++)
+            for (int i = 0; i < Data.Columns.Count; i++)
             {
-                for (int j = 0; j < Table_Height; j++)
+                for (int j = 0; j < Data.Rows.Count; j++)
                 {
-                    excelcells.Value2 = list[i, j];
+                    excelcells.Value2 = Data.Rows[j].ItemArray[i].ToString();
                     excelcells = excelcells.Offset[1, 0];
                     Progress.Current.Position++;
+                    Application.DoEvents();
                     if (Progress.Abort)
                     {
                         excelappworkbook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя
@@ -203,7 +261,7 @@ namespace TableParser
                         return;
                     }
                 }
-                excelcells = excelcells.Offset[0 - Table_Height, 1];
+                excelcells = excelcells.Offset[0 - Data.Rows.Count, 1];
             }
             excelappworkbook.SaveAs(FileName,  //object Filename
             Excel.XlFileFormat.xlOpenXMLWorkbook, //object FileFormat

@@ -31,12 +31,12 @@
             this.components = new System.ComponentModel.Container();
             this.button1 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.PBCL = new System.Windows.Forms.Label();
-            this.PBC = new System.Windows.Forms.ProgressBar();
-            this.PBAL = new System.Windows.Forms.Label();
-            this.PBA = new System.Windows.Forms.ProgressBar();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.button2 = new System.Windows.Forms.Button();
+            this.PBA = new System.Windows.Forms.ProgressBar();
+            this.PBAL = new System.Windows.Forms.Label();
+            this.PBC = new System.Windows.Forms.ProgressBar();
+            this.PBCL = new System.Windows.Forms.Label();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
@@ -66,22 +66,23 @@
             this.panel1.TabIndex = 1;
             this.panel1.Visible = false;
             // 
-            // PBCL
+            // button2
             // 
-            this.PBCL.AutoSize = true;
-            this.PBCL.Location = new System.Drawing.Point(0, 0);
-            this.PBCL.Name = "PBCL";
-            this.PBCL.Size = new System.Drawing.Size(51, 20);
-            this.PBCL.TabIndex = 0;
-            this.PBCL.Text = "label1";
+            this.button2.Location = new System.Drawing.Point(111, 128);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(150, 34);
+            this.button2.TabIndex = 4;
+            this.button2.Text = "Отмена";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
-            // PBC
+            // PBA
             // 
-            this.PBC.Location = new System.Drawing.Point(3, 23);
-            this.PBC.Maximum = 1000;
-            this.PBC.Name = "PBC";
-            this.PBC.Size = new System.Drawing.Size(395, 23);
-            this.PBC.TabIndex = 1;
+            this.PBA.Location = new System.Drawing.Point(3, 85);
+            this.PBA.Maximum = 1000;
+            this.PBA.Name = "PBA";
+            this.PBA.Size = new System.Drawing.Size(395, 23);
+            this.PBA.TabIndex = 3;
             // 
             // PBAL
             // 
@@ -92,29 +93,28 @@
             this.PBAL.TabIndex = 2;
             this.PBAL.Text = "Всего";
             // 
-            // PBA
+            // PBC
             // 
-            this.PBA.Location = new System.Drawing.Point(3, 85);
-            this.PBA.Maximum = 1000;
-            this.PBA.Name = "PBA";
-            this.PBA.Size = new System.Drawing.Size(395, 23);
-            this.PBA.TabIndex = 3;
+            this.PBC.Location = new System.Drawing.Point(3, 23);
+            this.PBC.Maximum = 1000;
+            this.PBC.Name = "PBC";
+            this.PBC.Size = new System.Drawing.Size(395, 23);
+            this.PBC.TabIndex = 1;
+            // 
+            // PBCL
+            // 
+            this.PBCL.AutoSize = true;
+            this.PBCL.Location = new System.Drawing.Point(0, 0);
+            this.PBCL.Name = "PBCL";
+            this.PBCL.Size = new System.Drawing.Size(51, 20);
+            this.PBCL.TabIndex = 0;
+            this.PBCL.Text = "label1";
             // 
             // timer1
             // 
             this.timer1.Enabled = true;
             this.timer1.Interval = 500;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(111, 128);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(150, 34);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "Отмена";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button3
             // 
@@ -151,7 +151,6 @@
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Разедлитель книг Excel";
             this.panel1.ResumeLayout(false);
