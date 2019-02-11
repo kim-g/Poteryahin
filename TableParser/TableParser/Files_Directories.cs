@@ -9,7 +9,7 @@ namespace TableParser
 {
     class Files_Directories
     {
-        public static string OpenFile(string Title, string Filter= "Все файлы (*.*)|*.*")
+        public static string OpenFile(string Title, string Filter= "Файлы Excel 2007+ (*.xlsx)|*.xlsx|Все файлы (*.*)|*.*")
         {
             using (var ofd = new OpenFileDialog())
             {

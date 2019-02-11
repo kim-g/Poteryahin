@@ -1,0 +1,51 @@
+﻿<Window x:Class="ExcelFilter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ExcelFilter"
+        mc:Ignorable="d"
+        Title="Фильтрование данных из Excel" Height="219" Width="593.5" ResizeMode="CanMinimize">
+    <Grid x:Name="grid" Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Vertical" UseLayoutRounding="False" Margin="0" Width="{Binding ActualWidth, ElementName=grid, Mode=OneWay}">
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="100*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Файл с полными данными" Margin="0,0,10,0"/>
+                <TextBox x:Name="FromTB" Grid.Column="1"  Margin="0,0,10,0"/>
+                <Button x:Name="OpenFromFile" Grid.Column="2" Content="..." Padding="5,1" HorizontalAlignment="Left" Width="22" Click="OpenFromFile_Click"/>
+            </Grid>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="100*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Файл с фильтром" Margin="0,0,10,0"/>
+                <TextBox x:Name="FilterTB" Grid.Column="1"  Margin="0,0,10,0"/>
+                <Button x:Name="OpenFilterFile" Grid.Column="2" Content="..." Padding="5,1" HorizontalAlignment="Left" Width="22" Click="OpenFilterFile_Click"/>
+            </Grid>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="100*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Выходной файл" Margin="0,0,10,0"/>
+                <TextBox x:Name="OutTB" Grid.Column="1"  Margin="0,0,10,0"/>
+                <Button x:Name="SaveOutFile" Grid.Column="2" Content="..." Padding="5,1" HorizontalAlignment="Left" Width="22" Click="SaveOutFile_Click"/>
+            </Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="FilterExists" Content="Отфильтровать по совпадению" Margin="0,0,10,0" Padding="10,1" Click="FilterExists_Click"/>
+                <Button x:Name="FilterТщеExists" Content="Отфильтровать по различиям" Margin="0" Padding="10,1" Click="FilterТщеExists_Click"/>
+            </StackPanel>
+            <Label x:Name="Status" Content="Выберите файлы и операцию" HorizontalContentAlignment="Center" FontWeight="Bold"/>
+        </StackPanel>
+    </Grid>
+</Window>
