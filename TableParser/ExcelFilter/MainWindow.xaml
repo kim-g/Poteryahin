@@ -44,6 +44,7 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="FilterExists" Content="Отфильтровать по совпадению" Margin="0,0,10,0" Padding="10,1" Click="FilterExists_Click"/>
                 <Button x:Name="FilterТщеExists" Content="Отфильтровать по различиям" Margin="0" Padding="10,1" Click="FilterТщеExists_Click"/>
+                <Button x:Name="Aborting" Content="Прервать выполнение" Margin="0" Padding="10,1" Click="Aborting_Click" Visibility="Collapsed"/>
             </StackPanel>
             <Label x:Name="Status" Content="Выберите файлы и операцию" HorizontalContentAlignment="Center" FontWeight="Bold"/>
         </StackPanel>

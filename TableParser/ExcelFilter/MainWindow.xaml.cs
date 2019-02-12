@@ -24,6 +24,9 @@ namespace ExcelFilter
     /// </summary>
     public partial class MainWindow : Window
     {
+        private bool Abort = false;
+        int LastPercent = -1;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -45,12 +48,34 @@ namespace ExcelFilter
 
         private void FilterExists_Click(object sender, RoutedEventArgs e)
         {
-            Status.Content = "Загрузка данных";
-            DataTable In = LoadIn(FromTB.Text);
-            DataTable Filter = LoadFilters(FilterTB.Text);
-            DataTable Out = PrepareOut();
+            // Установка возможности прерывания
+            Abort = false;
+            FilterExists.Visibility = Visibility.Collapsed;
+            FilterТщеExists.Visibility = Visibility.Collapsed;
+            Aborting.Visibility = Visibility.Visible;
 
-            Status.Content = "Поиск совпадений";
+            string StatusStr;
+            Status.Content = "Открытие файла данных";
+            Wait();
+            if (Abort) return;
+            DataTable In = LoadIn(FromTB.Text);
+            Status.Content = "Открытие файла фильтров";
+            Wait();
+            if (Abort) return;
+            DataTable Filter = LoadFilters(FilterTB.Text);
+            Status.Content = "Подготовка выходного файла";
+            Wait();
+            if (Abort) return;
+            DataTable Out = PrepareOut();
+            Wait();
+            if (Abort) return;
+
+            StatusStr = "Поиск совпадений";
+            int i = 0;
+            int m = In.Rows.Count;
+            SetStatus(StatusStr, i, m);
+            Wait();
+            if (Abort) return;
             // Ищем совпадения
             foreach (DataRow inrow in In.Rows)
             {
@@ -62,19 +87,30 @@ namespace ExcelFilter
                         break;
                     }
                 }
+                SetStatus(StatusStr, i++, m);
+                Wait();
+                if (Abort) return;
             }
 
             Status.Content = "Сохранение данных";
+            Wait();
+            if (Abort) return;
             SaveToXMLS(Out);
+            Wait();
+            if (Abort) return;
             Status.Content = "Данные отфильтрованы";
             MessageBox.Show("Данные отфильтрованы");
+            FilterExists.Visibility = Visibility.Visible;
+            FilterТщеExists.Visibility = Visibility.Visible;
+            Aborting.Visibility = Visibility.Collapsed;
         }
 
         private void SaveToXMLS(DataTable Out)
         {
             XLWorkbook OutTable = new XLWorkbook();
+            Wait();
             OutTable.Worksheets.Add(Out);
-
+            Wait();
             OutTable.SaveAs(OutTB.Text);
         }
 
@@ -90,8 +126,16 @@ namespace ExcelFilter
             In.Columns.Add("Data2", typeof(string));
             In.Columns.Add("Date", typeof(DateTime));
 
+            string StatusStr = "Загрузка данных";
+            int i = 0;
+            int m = FromSheet.RangeUsed().RowsUsed().Skip(0).Count();
+            SetStatus(StatusStr, i, m);
             foreach (var row in FromSheet.RangeUsed().RowsUsed().Skip(0))
+            {
                 In.Rows.Add(row.Cell(1).Value, row.Cell(2).Value, row.Cell(3).Value, row.Cell(4).Value);
+                SetStatus(StatusStr, i++, m);
+                Wait();
+            }
 
             return In;
         }
@@ -105,8 +149,17 @@ namespace ExcelFilter
             Filter.TableName = "Фильтры";
             Filter.Columns.Add("Number", typeof(string));
 
+            string StatusStr = "Загрузка фильтров";
+            int i = 0;
+            int m = FilterSheet.RangeUsed().RowsUsed().Skip(0).Count();
+            SetStatus(StatusStr, i, m);
+
             foreach (var row in FilterSheet.RangeUsed().RowsUsed().Skip(0))
+            {
                 Filter.Rows.Add(row.Cell(1).Value);
+                SetStatus(StatusStr, i++, m);
+                Wait();
+            }
 
             return Filter;
         }
@@ -135,17 +188,47 @@ namespace ExcelFilter
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { }));
         }
 
+        private void SetStatus(string StatusString, int Pos, int Max)
+        {
+            int NewPercent = Pos * 100 / Max;
+            if (NewPercent != LastPercent)
+            {
+                Status.Content = StatusString + ": " + NewPercent.ToString() + "%";
+                LastPercent = NewPercent;
+            }
+        }
+
         private void FilterТщеExists_Click(object sender, RoutedEventArgs e)
         {
-            Status.Content = "Загрузка данных";
+            // Установка возможности прерывания
+            Abort = false;
+            FilterExists.Visibility = Visibility.Collapsed;
+            FilterТщеExists.Visibility = Visibility.Collapsed;
+            Aborting.Visibility = Visibility.Visible;
+
+            string StatusStr;
+            Status.Content = "Открытие файла данных";
             Wait();
+            if (Abort) return;
             DataTable In = LoadIn(FromTB.Text);
+            Status.Content = "Открытие файла фильтров";
+            Wait();
+            if (Abort) return;
             DataTable Filter = LoadFilters(FilterTB.Text);
+            Status.Content = "Подготовка выходного файла";
+            Wait();
+            if (Abort) return;
             DataTable Out = PrepareOut();
+            Wait();
+            if (Abort) return;
 
             // Ищем совпадения
-            Status.Content = "Поиск несовпадающих записей";
+            int i = 0;
+            int m = In.Rows.Count;
+            StatusStr = "Поиск несовпадающих записей";
+            SetStatus(StatusStr, i, m);
             Wait();
+            if (Abort) return;
             foreach (DataRow inrow in In.Rows)
             {
                 bool Found = false;
@@ -157,14 +240,32 @@ namespace ExcelFilter
                         break;
                     }
                 }
+                SetStatus(StatusStr, i++, m);
                 if (!Found) Out.Rows.Add(inrow.ItemArray);
+                Wait();
+                if (Abort) return;
             }
 
             Status.Content = "Сохранение данных";
             Wait();
+            if (Abort) return;
             SaveToXMLS(Out);
             Status.Content = "Данные отфильтрованы";
             MessageBox.Show("Данные отфильтрованы");
+            FilterExists.Visibility = Visibility.Visible;
+            FilterТщеExists.Visibility = Visibility.Visible;
+            Aborting.Visibility = Visibility.Collapsed;
+        }
+
+        private void Aborting_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Вы уверены, что хотите прервать процесс?", "Прерывание", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                Abort = true;
+                FilterExists.Visibility = Visibility.Visible;
+                FilterТщеExists.Visibility = Visibility.Visible;
+                Aborting.Visibility = Visibility.Collapsed;
+            }
         }
     }
 }
