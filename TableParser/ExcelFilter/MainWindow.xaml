@@ -49,7 +49,9 @@
                 <Button x:Name="FilterТщеExists" Content="Отфильтровать по различиям" Margin="0" Padding="10,1" Click="FilterExists_Click" Tag="1"/>
                 <Button x:Name="Aborting" Content="Прервать выполнение" Margin="0" Padding="10,1" Click="Aborting_Click" Visibility="Collapsed"/>
             </StackPanel>
-            <Label x:Name="Status" Content="Выберите файлы и операцию" HorizontalContentAlignment="Center" FontWeight="Bold"/>
+            <Label x:Name="Status" HorizontalContentAlignment="Center" FontWeight="Bold">
+                <TextBlock x:Name="StatusBlock">Выберите файлы и операцию</TextBlock>
+            </Label>
         </StackPanel>
     </Grid>
 </Window>

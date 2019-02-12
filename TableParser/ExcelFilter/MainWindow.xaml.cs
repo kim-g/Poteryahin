@@ -60,11 +60,11 @@ namespace ExcelFilter
             Aborting.Visibility = Visibility.Visible;
 
             // Открытие исходных файлов и подготовка DataTable таблиц
-            Status.Content = "Открытие файла данных";
+            StatusBlock.Text = "Открытие файла данных";
             Wait();
             if (Abort) return;
             DataTable In = LoadIn(FromTB.Text);
-            Status.Content = "Открытие файла фильтров";
+            StatusBlock.Text = "Открытие файла фильтров";
             Wait();
             if (Abort) return;
 
@@ -72,10 +72,10 @@ namespace ExcelFilter
             {
                 DataTable Filter = LoadFilters(FilterFile.ToString());
                 string FilterName = Path.GetFileName(FilterFile.ToString());
-                Status.Content = $"{FilterName}: Подготовка выходного файла";
+                StatusBlock.Text = $"{FilterName}: Подготовка выходного файла";
                 Wait();
                 if (Abort) return;
-                DataTable Out = PrepareOut();
+                DataTable Out = PrepareOut(In);
                 Wait();
                 if (Abort) return;
 
@@ -86,13 +86,13 @@ namespace ExcelFilter
                 if (Out == null) return;
 
                 // Сохраняем данные
-                Status.Content = $"{FilterName}: Сохранение данных";
+                StatusBlock.Text = $"{FilterName}: Сохранение данных";
                 Wait();
                 if (Abort) return;
                 SaveToXMLS(Out, Path.Combine(OutTB.Text, Path.GetFileName(FilterFile.ToString())));
                 Wait();
                 if (Abort) return;
-                Status.Content = $"{FilterName}: Данные отфильтрованы";
+                StatusBlock.Text = $"{FilterName}: Данные отфильтрованы";
             }
             MessageBox.Show("Все данные отфильтрованы");
             FilterExists.Visibility = Visibility.Visible;
@@ -127,10 +127,8 @@ namespace ExcelFilter
             // Подготовка таблицы
             DataTable In = new DataTable();
             In.TableName = "Исходные данные";
-            In.Columns.Add("Number", typeof(string));
-            In.Columns.Add("Data1", typeof(string));
-            In.Columns.Add("Data2", typeof(string));
-            In.Columns.Add("Date", typeof(DateTime));
+            foreach(object X in FromSheet.Columns())
+                In.Columns.Add();
 
             // Подготовка счётчиков для статусной строки
             string StatusStr = "Загрузка данных";
@@ -141,7 +139,10 @@ namespace ExcelFilter
             // Загрузка данных из книги Excel в DataTable
             foreach (var row in FromSheet.RangeUsed().RowsUsed().Skip(0))
             {
-                In.Rows.Add(row.Cell(1).Value, row.Cell(2).Value, row.Cell(3).Value, row.Cell(4).Value);
+                object[] NewRow = new object[In.Columns.Count];
+                for (int j = 0; j < In.Columns.Count; j++)
+                    NewRow[j] = row.Cell(j + 1).Value;
+                In.Rows.Add(NewRow);
                 SetStatus(StatusStr, i++, m);
                 Wait();
             }
@@ -186,14 +187,12 @@ namespace ExcelFilter
         /// Подготовка выводной таблицы
         /// </summary>
         /// <returns></returns>
-        private DataTable PrepareOut()
+        private DataTable PrepareOut(DataTable In)
         {
             DataTable Out = new DataTable();
             Out.TableName = "Отфильтрованные данные";
-            Out.Columns.Add("Number", typeof(string));
-            Out.Columns.Add("Data1", typeof(string));
-            Out.Columns.Add("Data2", typeof(string));
-            Out.Columns.Add("Date", typeof(DateTime));
+            foreach (object X in In.Columns)
+                Out.Columns.Add();
 
             return Out;
         }
@@ -231,7 +230,7 @@ namespace ExcelFilter
             int NewPercent = Pos * 100 / Max;
             if (NewPercent != LastPercent)
             {
-                Status.Content = StatusString + ": " + NewPercent.ToString() + "%";
+                StatusBlock.Text = StatusString + ": " + NewPercent.ToString() + "%";
                 LastPercent = NewPercent;
             }
         }
@@ -281,13 +280,19 @@ namespace ExcelFilter
             // Ищем совпадения
             foreach (DataRow inrow in In.Rows)
             {
-                foreach (DataRow frow in Filter.Rows)
+                foreach (object InCell in inrow.ItemArray)
                 {
-                    if (inrow.ItemArray[0].ToString() == frow.ItemArray[0].ToString())
+                    bool Stop = false;
+                    foreach (DataRow frow in Filter.Rows)
                     {
-                        Out.Rows.Add(inrow.ItemArray);
-                        break;
+                        if (InCell.ToString() == frow.ItemArray[0].ToString())
+                        {
+                            Out.Rows.Add(inrow.ItemArray);
+                            Stop = true;
+                            break;
+                        }
                     }
+                    if (Stop) break;
                 }
                 SetStatus(StatusStr, i++, m);
                 Wait();
