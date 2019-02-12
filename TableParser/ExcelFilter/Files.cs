@@ -9,6 +9,12 @@ namespace ExcelFilter
 {
     class Files
     {
+        /// <summary>
+        /// Открыть диалоговое окно открытия файла
+        /// </summary>
+        /// <param name="Title">Заголовок окна</param>
+        /// <param name="Filter">Фильтр файлов</param>
+        /// <returns></returns>
         public static string OpenFile(string Title, string Filter = "Файлы Excel 2007+ (*.xlsx)|*.xlsx|Все файлы (*.*)|*.*")
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -26,6 +32,12 @@ namespace ExcelFilter
             return null;
         }
 
+        /// <summary>
+        /// Открыть диалоговое окно сохранения файла
+        /// </summary>
+        /// <param name="Title">Заголовок окна</param>
+        /// <param name="Filter">Фильтр файлов</param>
+        /// <returns></returns>
         public static string SaveFile(string Title, string Filter = "Файлы Excel 2007+ (*.xlsx)|*.xlsx|Все файлы (*.*)|*.*")
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog()
@@ -39,16 +51,6 @@ namespace ExcelFilter
             {
                 return saveFileDialog.FileName;
             }
-            return null;
-        }
-
-        public static string[] OpenFiles(string Title, string Filter = "Все файлы (*.*)|*.*")
-        {
-            return null;
-        }
-
-        public static string OpenDirectory()
-        {
             return null;
         }
     }
