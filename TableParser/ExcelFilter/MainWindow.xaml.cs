@@ -1,20 +1,10 @@
 ﻿using ClosedXML.Excel;
 using System;
-using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace ExcelFilter
@@ -51,7 +41,7 @@ namespace ExcelFilter
         /// <param name="e"></param>
         private void SaveOutFile_Click(object sender, RoutedEventArgs e)
         {
-            string Answer = Files.SaveFile("Открыть файл с исходными данными");
+            string Answer = Files.OpenDirectory("Открыть файл с исходными данными");
             if (Answer != null)
                 OutTB.Text = Answer;
         }
@@ -70,7 +60,6 @@ namespace ExcelFilter
             Aborting.Visibility = Visibility.Visible;
 
             // Открытие исходных файлов и подготовка DataTable таблиц
-            string StatusStr;
             Status.Content = "Открытие файла данных";
             Wait();
             if (Abort) return;
@@ -78,46 +67,34 @@ namespace ExcelFilter
             Status.Content = "Открытие файла фильтров";
             Wait();
             if (Abort) return;
-            DataTable Filter = LoadFilters(FilterTB.Text);
-            Status.Content = "Подготовка выходного файла";
-            Wait();
-            if (Abort) return;
-            DataTable Out = PrepareOut();
-            Wait();
-            if (Abort) return;
 
-            // Подготовка счётчика для статусной строки
-            StatusStr = "Поиск совпадений";
-            int i = 0;
-            int m = In.Rows.Count;
-            SetStatus(StatusStr, i, m);
-            Wait();
-            if (Abort) return;
-            // Ищем совпадения
-            foreach (DataRow inrow in In.Rows)
+            foreach (object FilterFile in FilterTB.Items)
             {
-                foreach (DataRow frow in Filter.Rows)
-                {
-                    if (inrow.ItemArray[0].ToString() == frow.ItemArray[0].ToString())
-                    {
-                        Out.Rows.Add(inrow.ItemArray);
-                        break;
-                    }
-                }
-                SetStatus(StatusStr, i++, m);
+                DataTable Filter = LoadFilters(FilterFile.ToString());
+                string FilterName = Path.GetFileName(FilterFile.ToString());
+                Status.Content = $"{FilterName}: Подготовка выходного файла";
                 Wait();
                 if (Abort) return;
-            }
+                DataTable Out = PrepareOut();
+                Wait();
+                if (Abort) return;
 
-            // Сохраняем данные
-            Status.Content = "Сохранение данных";
-            Wait();
-            if (Abort) return;
-            SaveToXMLS(Out);
-            Wait();
-            if (Abort) return;
-            Status.Content = "Данные отфильтрованы";
-            MessageBox.Show("Данные отфильтрованы");
+                // Обработка фильтра
+                Out = ((FrameworkElement)sender).Tag.ToString() == "0"
+                    ? FindOverlap(In, Filter, Out, FilterName)
+                    : FindDifferences(In, Filter, Out, FilterName);
+                if (Out == null) return;
+
+                // Сохраняем данные
+                Status.Content = $"{FilterName}: Сохранение данных";
+                Wait();
+                if (Abort) return;
+                SaveToXMLS(Out, Path.Combine(OutTB.Text, Path.GetFileName(FilterFile.ToString())));
+                Wait();
+                if (Abort) return;
+                Status.Content = $"{FilterName}: Данные отфильтрованы";
+            }
+            MessageBox.Show("Все данные отфильтрованы");
             FilterExists.Visibility = Visibility.Visible;
             FilterТщеExists.Visibility = Visibility.Visible;
             Aborting.Visibility = Visibility.Collapsed;
@@ -127,13 +104,13 @@ namespace ExcelFilter
         /// Сохранение данных в xlsx формате. Имя файла берётся из текстового поля
         /// </summary>
         /// <param name="Out">Таблица для сохранения</param>
-        private void SaveToXMLS(DataTable Out)
+        private void SaveToXMLS(DataTable Out, string FileName)
         {
             XLWorkbook OutTable = new XLWorkbook();
             Wait();
             OutTable.Worksheets.Add(Out);
             Wait();
-            OutTable.SaveAs(OutTB.Text);
+            OutTable.SaveAs(FileName);
         }
 
         /// <summary>
@@ -180,7 +157,7 @@ namespace ExcelFilter
         private DataTable LoadFilters(string FileName)
         {
             // Загрузка книги Excel
-            XLWorkbook FilterTable = new XLWorkbook(FilterTB.Text);
+            XLWorkbook FilterTable = new XLWorkbook(FilterTB.Items[0].ToString());
             IXLWorksheet FilterSheet = FilterTable.Worksheets.ToList()[0];
 
             // Подготовка таблицы
@@ -228,9 +205,10 @@ namespace ExcelFilter
         /// <param name="e"></param>
         private void OpenFilterFile_Click(object sender, RoutedEventArgs e)
         {
-            string Answer = Files.OpenFile("Открыть файл с исходными данными");
+            string[] Answer = Files.OpenFiles("Открыть файл с исходными данными");
             if (Answer != null)
-                FilterTB.Text = Answer;
+                foreach (string X in Answer)
+                    FilterTB.Items.Add(X);
         }
 
         /// <summary>
@@ -257,43 +235,84 @@ namespace ExcelFilter
                 LastPercent = NewPercent;
             }
         }
+ 
         /// <summary>
-        /// Фильтрует данные по несовпадению
+        /// Нажатие на кнопку прерывания работы
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void FilterТщеExists_Click(object sender, RoutedEventArgs e)
+        private void Aborting_Click(object sender, RoutedEventArgs e)
         {
-            // Установка возможности прерывания
-            Abort = false;
-            FilterExists.Visibility = Visibility.Collapsed;
-            FilterТщеExists.Visibility = Visibility.Collapsed;
-            Aborting.Visibility = Visibility.Visible;
+            if (MessageBox.Show("Вы уверены, что хотите прервать процесс?", "Прерывание", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                Abort = true;
+                FilterExists.Visibility = Visibility.Visible;
+                FilterТщеExists.Visibility = Visibility.Visible;
+                Aborting.Visibility = Visibility.Collapsed;
+            }
+        }
 
-            // Загрузка исходных данных
-            string StatusStr;
-            Status.Content = "Открытие файла данных";
-            Wait();
-            if (Abort) return;
-            DataTable In = LoadIn(FromTB.Text);
-            Status.Content = "Открытие файла фильтров";
-            Wait();
-            if (Abort) return;
-            DataTable Filter = LoadFilters(FilterTB.Text);
-            Status.Content = "Подготовка выходного файла";
-            Wait();
-            if (Abort) return;
-            DataTable Out = PrepareOut();
-            Wait();
-            if (Abort) return;
+        private void ExcludeFilterFile_Click(object sender, RoutedEventArgs e)
+        {
+            if (FilterTB.SelectedItems.Count > 0)
+            {
+                object[] Selected = new object[FilterTB.SelectedItems.Count];
+                FilterTB.SelectedItems.CopyTo(Selected, 0);
+                foreach (object X in Selected)
+                    FilterTB.Items.Remove(X);
+            }
+        }
 
-            // Подготовка счётчика статусной строки
+        /// <summary>
+        /// Ищет пересечения исходных данных с фильтром
+        /// </summary>
+        /// <param name="In">Входные данные</param>
+        /// <param name="Filter">Фильтр</param>
+        /// <param name="Out">Выходной формат</param>
+        /// <returns></returns>
+        private DataTable FindOverlap(DataTable In, DataTable Filter, DataTable Out, string FilterName)
+        {
+            string StatusStr = $"{FilterName}: Поиск совпадений";
             int i = 0;
             int m = In.Rows.Count;
-            StatusStr = "Поиск несовпадающих записей";
             SetStatus(StatusStr, i, m);
             Wait();
-            if (Abort) return;
+            if (Abort) return null;
+            // Ищем совпадения
+            foreach (DataRow inrow in In.Rows)
+            {
+                foreach (DataRow frow in Filter.Rows)
+                {
+                    if (inrow.ItemArray[0].ToString() == frow.ItemArray[0].ToString())
+                    {
+                        Out.Rows.Add(inrow.ItemArray);
+                        break;
+                    }
+                }
+                SetStatus(StatusStr, i++, m);
+                Wait();
+                if (Abort) return null;
+            }
+
+            return Out;
+        }
+
+        /// <summary>
+        /// Ищет hfpybwe исходных данных с фильтром
+        /// </summary>
+        /// <param name="In">Входные данные</param>
+        /// <param name="Filter">Фильтр</param>
+        /// <param name="Out">Выходной формат</param>
+        /// <returns></returns>
+        private DataTable FindDifferences(DataTable In, DataTable Filter, DataTable Out, string FilterName)
+        {
+            string StatusStr = "Поиск совпадений";
+            int i = 0;
+            int m = In.Rows.Count;
+            StatusStr = StatusStr = $"{FilterName}: Поиск несовпадающих записей";
+            SetStatus(StatusStr, i, m);
+            Wait();
+            if (Abort) return null;
             // Ищем совпадения
             foreach (DataRow inrow in In.Rows)
             {
@@ -309,37 +328,10 @@ namespace ExcelFilter
                 SetStatus(StatusStr, i++, m);
                 if (!Found) Out.Rows.Add(inrow.ItemArray);
                 Wait();
-                if (Abort) return;
+                if (Abort) return null;
             }
 
-            // Сохранение отфильтрованных данных
-            Status.Content = "Сохранение данных";
-            Wait();
-            if (Abort) return;
-            SaveToXMLS(Out);
-            Status.Content = "Данные отфильтрованы";
-            MessageBox.Show("Данные отфильтрованы");
-
-            // Возвращаем кнопки на место
-            FilterExists.Visibility = Visibility.Visible;
-            FilterТщеExists.Visibility = Visibility.Visible;
-            Aborting.Visibility = Visibility.Collapsed;
-        }
-
-        /// <summary>
-        /// Нажатие на кнопку прерывания работы
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Aborting_Click(object sender, RoutedEventArgs e)
-        {
-            if (MessageBox.Show("Вы уверены, что хотите прервать процесс?", "Прерывание", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-            {
-                Abort = true;
-                FilterExists.Visibility = Visibility.Visible;
-                FilterТщеExists.Visibility = Visibility.Visible;
-                Aborting.Visibility = Visibility.Collapsed;
-            }
+            return Out;
         }
     }
 }
