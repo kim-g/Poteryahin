@@ -16,10 +16,14 @@ namespace ExcelFilter
     {
         private bool Abort = false;
         int LastPercent = -1;
+        const bool ShowDifBtn = false;
 
         public MainWindow()
         {
             InitializeComponent();
+            FilterТщеExists.Visibility = ShowDifBtn
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
 
         /// <summary>
@@ -96,7 +100,9 @@ namespace ExcelFilter
             }
             MessageBox.Show("Все данные отфильтрованы");
             FilterExists.Visibility = Visibility.Visible;
-            FilterТщеExists.Visibility = Visibility.Visible;
+            FilterТщеExists.Visibility = ShowDifBtn
+                ? Visibility.Visible
+                : Visibility.Collapsed;
             Aborting.Visibility = Visibility.Collapsed;
         }
 
@@ -246,7 +252,9 @@ namespace ExcelFilter
             {
                 Abort = true;
                 FilterExists.Visibility = Visibility.Visible;
-                FilterТщеExists.Visibility = Visibility.Visible;
+                FilterТщеExists.Visibility = ShowDifBtn
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
                 Aborting.Visibility = Visibility.Collapsed;
             }
         }
