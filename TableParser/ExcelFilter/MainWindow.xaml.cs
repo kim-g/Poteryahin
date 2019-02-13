@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
+using Extentions;
 
 namespace ExcelFilter
 {
@@ -16,7 +17,8 @@ namespace ExcelFilter
     {
         private bool Abort = false;
         int LastPercent = -1;
-        const bool ShowDifBtn = false;
+        const bool ShowDifBtn = true;
+        const int Head = 1;
 
         public MainWindow()
         {
@@ -98,6 +100,7 @@ namespace ExcelFilter
                 if (Abort) return;
                 StatusBlock.Text = $"{FilterName}: Данные отфильтрованы";
             }
+            StatusBlock.Text = $"Выберите файлы и операцию";
             MessageBox.Show("Все данные отфильтрованы");
             FilterExists.Visibility = Visibility.Visible;
             FilterТщеExists.Visibility = ShowDifBtn
@@ -114,7 +117,33 @@ namespace ExcelFilter
         {
             XLWorkbook OutTable = new XLWorkbook();
             Wait();
-            OutTable.Worksheets.Add(Out);
+            IXLWorksheet CurWorksheet = OutTable.Worksheets.Add("Отфильтрованные данные");
+
+            // Добавление заголовка
+            int i = 1;
+            foreach (DataColumn Colomn in Out.Columns)
+                CurWorksheet.Cell(1, i++).Value = Colomn.Caption;
+
+            // Добавление данных
+            i = 0;
+            string StatusStr = $"{Path.GetFileName(FileName)}: Сохранение данных";
+            int m = Out.Rows.Count;
+            SetStatus(StatusStr, i, m);
+            foreach (DataRow R in Out.Rows)
+            {
+                int j = 0;
+                foreach (DataColumn Colomn in Out.Columns)
+                {
+                    CurWorksheet.Cell(i + 1 + Head, j + 1).Value =
+                        Out.Rows[i].ItemArray[j].ToString();
+                    if (Out.Columns[j].DataType == typeof(DateTime))
+                        CurWorksheet.Cell(i + 1 + Head, j + 1).DataType = XLDataType.DateTime;
+                    j++;
+                }
+                i++;
+                SetStatus(StatusStr, i, m);
+                Wait();
+            }
             Wait();
             OutTable.SaveAs(FileName);
         }
@@ -133,17 +162,19 @@ namespace ExcelFilter
             // Подготовка таблицы
             DataTable In = new DataTable();
             In.TableName = "Исходные данные";
+            int k = 1;
             foreach(object X in FromSheet.Columns())
-                In.Columns.Add();
+                In.Columns.Add(FromSheet.RangeUsed().RowsUsed().ToArray()[0].Cell(k).Value.ToString(), 
+                    FromSheet.RangeUsed().RowsUsed().ToArray()[1].Cell(k++).Value.GetType());
 
             // Подготовка счётчиков для статусной строки
             string StatusStr = "Загрузка данных";
             int i = 0;
-            int m = FromSheet.RangeUsed().RowsUsed().Skip(0).Count();
+            int m = FromSheet.RangeUsed().RowsUsed().Skip(Head).Count();
             SetStatus(StatusStr, i, m);
 
             // Загрузка данных из книги Excel в DataTable
-            foreach (var row in FromSheet.RangeUsed().RowsUsed().Skip(0))
+            foreach (var row in FromSheet.RangeUsed().RowsUsed().Skip(Head))
             {
                 object[] NewRow = new object[In.Columns.Count];
                 for (int j = 0; j < In.Columns.Count; j++)
@@ -196,9 +227,9 @@ namespace ExcelFilter
         private DataTable PrepareOut(DataTable In)
         {
             DataTable Out = new DataTable();
-            Out.TableName = "Отфильтрованные данные";
-            foreach (object X in In.Columns)
-                Out.Columns.Add();
+            Out.TableName = "Отфильтрованные данные"; 
+            foreach (DataColumn X in In.Columns)
+                Out.Columns.Add(X.Caption, X.DataType);
 
             return Out;
         }
