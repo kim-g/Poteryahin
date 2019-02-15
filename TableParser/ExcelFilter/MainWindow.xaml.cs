@@ -135,9 +135,17 @@ namespace ExcelFilter
                 foreach (DataColumn Colomn in Out.Columns)
                 {
                     CurWorksheet.Cell(i + 1 + Head, j + 1).Value =
-                        Out.Rows[i].ItemArray[j].ToString();
+                        Out.Rows[i].ItemArray[j];
                     if (Out.Columns[j].DataType == typeof(DateTime))
+                    {
+                        CurWorksheet.Cell(i + 1 + Head, j + 1).Value =
+                            Out.Rows[i].ItemArray[j];
                         CurWorksheet.Cell(i + 1 + Head, j + 1).DataType = XLDataType.DateTime;
+                    }
+                    else
+                    {
+                        CurWorksheet.Cell(i + 1 + Head, j + 1).SetValue(Out.Rows[i].ItemArray[j].ToString());
+                    }
                     j++;
                 }
                 i++;
