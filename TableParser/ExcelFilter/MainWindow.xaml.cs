@@ -17,7 +17,7 @@ namespace ExcelFilter
     {
         private bool Abort = false;
         int LastPercent = -1;
-        const bool ShowDifBtn = true;
+        const bool ShowDifBtn = false;
         const int Head = 1;
 
         public MainWindow()
@@ -203,7 +203,7 @@ namespace ExcelFilter
         private DataTable LoadFilters(string FileName)
         {
             // Загрузка книги Excel
-            XLWorkbook FilterTable = new XLWorkbook(FilterTB.Items[0].ToString());
+            XLWorkbook FilterTable = new XLWorkbook(FileName);
             IXLWorksheet FilterSheet = FilterTable.Worksheets.ToList()[0];
 
             // Подготовка таблицы
