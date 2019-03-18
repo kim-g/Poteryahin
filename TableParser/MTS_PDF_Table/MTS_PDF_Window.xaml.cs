@@ -1,10 +1,13 @@
-﻿using iTextSharp.text.pdf;
+﻿using ClosedXML.Excel;
+using iTextSharp.text.pdf;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace MTS_PDF_Table
 {
@@ -23,6 +27,9 @@ namespace MTS_PDF_Table
     /// </summary>
     public partial class MTS_PDF_Window : Window
     {
+        const int Head = 1;
+        bool Abort = false;
+
         public MTS_PDF_Window()
         {
             InitializeComponent();
@@ -60,119 +67,89 @@ namespace MTS_PDF_Table
             }
         }
 
-        private void FillForm()
-        {
-            string pdfTemplate = @"Standart.pdf";
-            string newFile = @"Standart_Out.pdf";
-            PdfReader pdfReader = new PdfReader(pdfTemplate);
-            PdfStamper pdfStamper = new PdfStamper(pdfReader, new FileStream(
-                newFile, FileMode.Create));
-            AcroFields pdfFormFields = pdfStamper.AcroFields;
-            // set form pdfFormFields
-            // The first worksheet and W-4 form
-
-            pdfFormFields.SetField("01", "01");
-            pdfFormFields.SetField("02", "02");
-            pdfFormFields.SetField("03", "03");
-            pdfFormFields.SetField("04", "04");
-            pdfFormFields.SetField("05", "05");
-            pdfFormFields.SetField("06", "06");
-            pdfFormFields.SetField("07", "07");
-            pdfFormFields.SetField("08", "08");
-            pdfFormFields.SetField("09", "09");
-            pdfFormFields.SetField("10", "10");
-            pdfFormFields.SetField("11", "11");
-            pdfFormFields.SetField("12", "12");
-            pdfFormFields.SetField("13", "13");
-            pdfFormFields.SetField("14", "14");
-            pdfFormFields.SetField("15", "15");
-            pdfFormFields.SetField("16", "16");
-            pdfFormFields.SetField("17", "17");
-            pdfFormFields.SetField("18", "18");
-            pdfFormFields.SetField("19", "19");
-            pdfFormFields.SetField("20", "20");
-            pdfFormFields.SetField("21", "21");
-            pdfFormFields.SetField("22", "22");
-            pdfFormFields.SetField("23", "23");
-            pdfFormFields.SetField("24", "24");
-            pdfFormFields.SetField("25", "25");
-            pdfFormFields.SetField("26", "26");
-            pdfFormFields.SetField("27", "27");
-            pdfFormFields.SetField("28", "28");
-            pdfFormFields.SetField("29", "29");
-            pdfFormFields.SetField("30", "30");
-            pdfFormFields.SetField("31", "31");
-            pdfFormFields.SetField("32", "32");
-            pdfFormFields.SetField("33", "33");
-            pdfFormFields.SetField("34", "34");
-            pdfFormFields.SetField("35", "35");
-            pdfFormFields.SetField("36", "36");
-            pdfFormFields.SetField("37", "37");
-            pdfFormFields.SetField("38", "38");
-            pdfFormFields.SetField("39", "39");
-            pdfFormFields.SetField("40", "40");
-            pdfFormFields.SetField("41", "41");
-            pdfFormFields.SetField("42", "42");
-            pdfFormFields.SetField("43", "43");
-            pdfFormFields.SetField("44", "44");
-            pdfFormFields.SetField("45", "45");
-            pdfFormFields.SetField("46", "46");
-            pdfFormFields.SetField("47", "47");
-            pdfFormFields.SetField("48", "48");
-            pdfFormFields.SetField("49", "49");
-            pdfFormFields.SetField("50", "50");
-            pdfFormFields.SetField("51", "51");
-            pdfFormFields.SetField("52", "52");
-            pdfFormFields.SetField("53", "53");
-            pdfFormFields.SetField("54", "54");
-            pdfFormFields.SetField("55", "55");
-            pdfFormFields.SetField("56", "56");
-            pdfFormFields.SetField("57", "57");
-            pdfFormFields.SetField("58", "58");
-            pdfFormFields.SetField("59", "59");
-            pdfFormFields.SetField("60", "60");
-            pdfFormFields.SetField("61", "61");
-            pdfFormFields.SetField("62", "62");
-            pdfFormFields.SetField("63", "63");
-            pdfFormFields.SetField("64", "64");
-            pdfFormFields.SetField("65", "65");
-            pdfFormFields.SetField("66", "66");
-            pdfFormFields.SetField("67", "67");
-            pdfFormFields.SetField("68", "68");
-            pdfFormFields.SetField("69", "69");
-            pdfFormFields.SetField("text1", "text1");
-            pdfFormFields.SetField("text2", "text2");
-
-
-            MessageBox.Show("Finished");
-            // flatten the form to remove editting options, set it to false
-            // to leave the form open to subsequent manual edits
-
-            pdfStamper.FormFlattening = false;
-            // close the pdf
-
-            pdfStamper.Close();
-        }
-
-
         private void FilterExists_Click(object sender, RoutedEventArgs e)
         {
-            FillForm();
+            foreach (string InFile in FilterTB.Items)
+            {
+                DataTable InTable = LoadIn(InFile);
+                PersonInfo PI = new PersonInfo(InTable, 0);
+                PI.FillForm(@"Standart_Out.pdf");
+            }
         }
 
         private void SaveOutFile_Click(object sender, RoutedEventArgs e)
         {
-
+            string Answer = ExcelFilter.Files.OpenDirectory("Открыть файл с исходными данными");
+            if (Answer != null)
+                OutTB.Text = Answer;
         }
 
         private void ExcludeFilterFile_Click(object sender, RoutedEventArgs e)
         {
-
+            if (FilterTB.SelectedItems.Count > 0)
+            {
+                object[] Selected = new object[FilterTB.SelectedItems.Count];
+                FilterTB.SelectedItems.CopyTo(Selected, 0);
+                foreach (object X in Selected)
+                    FilterTB.Items.Remove(X);
+            }
         }
 
         private void Aborting_Click(object sender, RoutedEventArgs e)
         {
+            if (MessageBox.Show("Вы уверены, что хотите прервать процесс?", "Прерывание", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                Abort = true;
+                FilterExists.Visibility = Visibility.Visible;
+                Aborting.Visibility = Visibility.Collapsed;
+            }
+        }
 
+        /// <summary>
+        /// Загрузка исходных данных в таблицу DataTable
+        /// </summary>
+        /// <param name="FileName">Имя файла, из которого загружаются данные</param>
+        /// <returns></returns>
+        private DataTable LoadIn(string FileName)
+        {
+            // Загрузка книги Excel
+            XLWorkbook FromTable = new XLWorkbook(FileName);
+            IXLWorksheet FromSheet = FromTable.Worksheets.ToList()[0];
+
+            // Подготовка таблицы
+            DataTable In = new DataTable();
+            In.TableName = "Исходные данные";
+            int k = 1;
+            foreach (object X in FromSheet.Columns())
+                In.Columns.Add(FromSheet.RangeUsed().RowsUsed().ToArray()[0].Cell(k).Value.ToString(),
+                    FromSheet.RangeUsed().RowsUsed().ToArray()[1].Cell(k++).Value.GetType());
+
+            // Подготовка счётчиков для статусной строки
+            string StatusStr = "Загрузка данных";
+            int i = 0;
+            int m = FromSheet.RangeUsed().RowsUsed().Skip(Head).Count();
+            //SetStatus(StatusStr, i, m);
+
+            // Загрузка данных из книги Excel в DataTable
+            foreach (var row in FromSheet.RangeUsed().RowsUsed().Skip(Head))
+            {
+                object[] NewRow = new object[In.Columns.Count];
+                for (int j = 0; j < In.Columns.Count; j++)
+                    NewRow[j] = row.Cell(j + 1).Value;
+                In.Rows.Add(NewRow);
+                //SetStatus(StatusStr, i++, m);
+                Wait();
+            }
+
+            return In;
+        }
+
+        /// <summary>
+        /// Прерывает выполнение процесса для обработки поступивших событий
+        /// </summary>
+        private void Wait()
+        {
+            Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { }));
         }
     }
 }

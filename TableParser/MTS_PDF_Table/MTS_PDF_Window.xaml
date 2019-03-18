@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MTS_PDF_Table"
         mc:Ignorable="d"
-        Title="MTS_PDF_Window" Height="450" Width="800">
+        Title="MTS_PDF_Window" Height="259.561" Width="800" SizeToContent="Height">
     <Grid Margin="10">
         <StackPanel Orientation="Vertical" UseLayoutRounding="False" Margin="0" Width="{Binding ActualWidth, ElementName=grid, Mode=OneWay}">
             <Grid Margin="0,0,0,10">
@@ -29,11 +29,10 @@
                 </Grid.ColumnDefinitions>
                 <Label Grid.Column="0" Content="Выводная директория" Margin="0,0,10,0"/>
                 <TextBox x:Name="OutTB" Grid.Column="1"  Margin="0,0,10,0"/>
-                <Button x:Name="SaveOutFile" Grid.Column="2" Content="..." Padding="5,1" HorizontalAlignment="Left" Width="22" Click="SaveOutFile_Click"/>
+                <Button x:Name="SaveOutFile" Grid.Column="2" Content="..." Padding="5,1" HorizontalAlignment="Left" Width="22" Click="SaveOutFile_Click" Height="26" VerticalAlignment="Top"/>
             </Grid>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="FilterExists" Content="Отфильтровать по совпадению" Margin="0,0,10,0" Padding="10,1" Click="FilterExists_Click" Tag="0"/>
-                <Button x:Name="FilterТщеExists" Content="Отфильтровать по различиям" Margin="0" Padding="10,1" Click="FilterExists_Click" Tag="1"/>
+                <Button x:Name="FilterExists" Content="Заполнить формы" Margin="0,0,10,0" Padding="10,1" Click="FilterExists_Click" Tag="0"/>
                 <Button x:Name="Aborting" Content="Прервать выполнение" Margin="0" Padding="10,1" Click="Aborting_Click" Visibility="Collapsed"/>
             </StackPanel>
             <Label x:Name="Status" HorizontalContentAlignment="Center" FontWeight="Bold">
