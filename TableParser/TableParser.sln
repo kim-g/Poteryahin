@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableParser", "TableParser\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelFilter", "ExcelFilter\ExcelFilter.csproj", "{D6340118-F13E-41C5-BDA1-CF4D15A58233}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTS_PDF_Table", "MTS_PDF_Table\MTS_PDF_Table.csproj", "{BC41295A-81EA-47B6-9E42-473546F51282}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D6340118-F13E-41C5-BDA1-CF4D15A58233} = {D6340118-F13E-41C5-BDA1-CF4D15A58233}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +26,10 @@ Global
 		{D6340118-F13E-41C5-BDA1-CF4D15A58233}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6340118-F13E-41C5-BDA1-CF4D15A58233}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6340118-F13E-41C5-BDA1-CF4D15A58233}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC41295A-81EA-47B6-9E42-473546F51282}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC41295A-81EA-47B6-9E42-473546F51282}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC41295A-81EA-47B6-9E42-473546F51282}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC41295A-81EA-47B6-9E42-473546F51282}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

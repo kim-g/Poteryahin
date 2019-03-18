@@ -17,7 +17,7 @@ namespace ExcelFilter
     {
         private bool Abort = false;
         int LastPercent = -1;
-        const bool ShowDifBtn = false;
+        const bool ShowDifBtn = true;
         const int Head = 1;
 
         public MainWindow()

@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace ExcelFilter
 {
-    class Files
+    public class Files
     {
         /// <summary>
         /// Открыть диалоговое окно открытия файла
