@@ -17,7 +17,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 using System.Windows.Threading;
 
 namespace MTS_PDF_Table
@@ -29,6 +29,7 @@ namespace MTS_PDF_Table
     {
         const int Head = 1;
         bool Abort = false;
+        int LastPercent = 143;
 
         public MTS_PDF_Window()
         {
@@ -71,10 +72,25 @@ namespace MTS_PDF_Table
         {
             foreach (string InFile in FilterTB.Items)
             {
+                string PureName = Path.GetFileNameWithoutExtension(InFile);
                 DataTable InTable = LoadIn(InFile);
-                PersonInfo PI = new PersonInfo(InTable, 0);
-                PI.FillForm(@"Standart_Out.pdf");
+
+                // Подготовка счётчиков для статусной строки
+                string StatusStr = $"{PureName}: Заполнение форм";
+                int m = InTable.Rows.Count;
+                SetStatus(StatusStr, 0, m);
+
+                for (int i = 0; i < InTable.Rows.Count; i++)
+                {
+                    PersonInfo PI = new PersonInfo(InTable, i);
+                    PI.FillForm(Path.Combine(OutTB.Text, PI.Number + ".pdf"));
+                    SetStatus(StatusStr, i, m);
+                    Wait();
+                    if (Abort) return;
+                }
             }
+
+            StatusBlock.Text = "Обработка форм завершена.";
         }
 
         private void SaveOutFile_Click(object sender, RoutedEventArgs e)
@@ -113,6 +129,7 @@ namespace MTS_PDF_Table
         private DataTable LoadIn(string FileName)
         {
             // Загрузка книги Excel
+            string PureName = Path.GetFileNameWithoutExtension(FileName);
             XLWorkbook FromTable = new XLWorkbook(FileName);
             IXLWorksheet FromSheet = FromTable.Worksheets.ToList()[0];
 
@@ -125,10 +142,11 @@ namespace MTS_PDF_Table
                     FromSheet.RangeUsed().RowsUsed().ToArray()[1].Cell(k++).Value.GetType());
 
             // Подготовка счётчиков для статусной строки
-            string StatusStr = "Загрузка данных";
+            string StatusStr = $"{PureName}: Загрузка данных";
             int i = 0;
             int m = FromSheet.RangeUsed().RowsUsed().Skip(Head).Count();
-            //SetStatus(StatusStr, i, m);
+            SetStatus(StatusStr, i, m);
+            Wait();
 
             // Загрузка данных из книги Excel в DataTable
             foreach (var row in FromSheet.RangeUsed().RowsUsed().Skip(Head))
@@ -137,7 +155,7 @@ namespace MTS_PDF_Table
                 for (int j = 0; j < In.Columns.Count; j++)
                     NewRow[j] = row.Cell(j + 1).Value;
                 In.Rows.Add(NewRow);
-                //SetStatus(StatusStr, i++, m);
+                SetStatus(StatusStr, i++, m);
                 Wait();
             }
 
@@ -150,6 +168,23 @@ namespace MTS_PDF_Table
         private void Wait()
         {
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { }));
+        }
+
+        /// <summary>
+        /// Устанавливает статусую строку с процентом выполнения. 
+        /// </summary>
+        /// <param name="StatusString">Текст статусной строки</param>
+        /// <param name="Pos">Позиция выполнения</param>
+        /// <param name="Max">Максимальная позиция выполнения</param>
+        private void SetStatus(string StatusString, int Pos, int Max)
+        {
+            // Меняет статус только в том случае, если изменяется процент выполнения для ускорения работы.
+            int NewPercent = Pos * 100 / Max;
+            if (NewPercent != LastPercent)
+            {
+                StatusBlock.Text = StatusString + ": " + NewPercent.ToString() + "%";
+                LastPercent = NewPercent;
+            }
         }
     }
 }
