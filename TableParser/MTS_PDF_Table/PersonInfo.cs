@@ -14,11 +14,14 @@ namespace MTS_PDF_Table
         public string Name { get; set; }
         public string SecondName { get; set; }
         public bool Sex { get; set; }
+        public string BirthPlace { get; set; }
+        public string Citizenship { get; set; }
         public string Document { get; set; }
         public string DocumentSerie { get; set; }
         public string DocumentNumber { get; set; }
-        public string DocumentIssuedBy { get; set; }
+        public string[] DocumentIssuedBy { get; set; } = new string[2];
         public DateTime DocumentIssueDate { get; set; }
+        public string DocumentIndex { get; set; }
         public DateTime Birth { get; set; }
         public string PlaceIndex { get; set; }
         public string PlaceCity { get; set; }
@@ -68,7 +71,14 @@ namespace MTS_PDF_Table
                         SecondName = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
                         break;
                     case "пол":
-                        Sex = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString().ToLowerInvariant() == "м";
+                        Sex = (InTable.Rows[Position].ItemArray[Col.Ordinal].ToString().ToLowerInvariant() == "м")
+                            || (InTable.Rows[Position].ItemArray[Col.Ordinal].ToString().ToLowerInvariant() == "m");
+                        break;
+                    case "место рождения":
+                        BirthPlace = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        break;
+                    case "гражданство":
+                        Citizenship = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
                         break;
                     case "документ удост личность":
                         Document = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
@@ -80,10 +90,31 @@ namespace MTS_PDF_Table
                         DocumentNumber = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
                         break;
                     case "кем выдан":
-                        DocumentIssuedBy = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        string Str = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        if (Str.Length < 50)
+                        {
+                            DocumentIssuedBy[0] = Str;
+                            DocumentIssuedBy[1] = "";
+                        }
+                        else
+                        {
+
+                            for (int i=50; i>0; i--)
+                            {
+                                if (Str[i] == ' ')
+                                {
+                                    DocumentIssuedBy[0] = Str.Remove(i);
+                                    DocumentIssuedBy[1] = Str.Substring(i + 1);
+                                    break;
+                                }
+                            }
+                        }
                         break;
                     case "дата выдачи":
                         DocumentIssueDate = DateTime.Parse(InTable.Rows[Position].ItemArray[Col.Ordinal].ToString());
+                        break;
+                    case "код подразделения":
+                        DocumentIndex = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
                         break;
                     case "дата рождения":
                         Birth = DateTime.Parse(InTable.Rows[Position].ItemArray[Col.Ordinal].ToString());
@@ -149,13 +180,17 @@ namespace MTS_PDF_Table
             pdfFormFields.SetField("08", Birth.Year.ToString("D4"));
             pdfFormFields.SetField("09", Sex ? "1" : "0");
             pdfFormFields.SetField("10", Sex ? "0" : "1");
+            pdfFormFields.SetField("11", BirthPlace);
+            pdfFormFields.SetField("12", Citizenship);
             pdfFormFields.SetField("13", Document);
             pdfFormFields.SetField("14", DocumentSerie);
             pdfFormFields.SetField("15", DocumentNumber);
-            pdfFormFields.SetField("16", DocumentIssuedBy);
+            pdfFormFields.SetField("16", DocumentIssuedBy[0]);
+            pdfFormFields.SetField("17", DocumentIssuedBy[1]);
             pdfFormFields.SetField("18", DocumentIssueDate.Day.ToString("D2"));
             pdfFormFields.SetField("19", DocumentIssueDate.Month.ToString("D2"));
             pdfFormFields.SetField("20", DocumentIssueDate.Year.ToString("D4"));
+            pdfFormFields.SetField("21", DocumentIndex);
             pdfFormFields.SetField("22", PlaceIndex);
             pdfFormFields.SetField("24", PlaceCity);
             pdfFormFields.SetField("25", PlaceStreet + ", " + PlaceBuilding + ", " + PlaceFlat);
