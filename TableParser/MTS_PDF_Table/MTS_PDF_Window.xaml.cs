@@ -1,5 +1,6 @@
 ﻿using ClosedXML.Excel;
 using iTextSharp.text.pdf;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -20,6 +21,7 @@ namespace MTS_PDF_Table
         const int Head = 1;
         bool Abort = false;
         int LastPercent = 143;
+        public static Log LogWindow = new Log();
 
         public MTS_PDF_Window()
         {
@@ -125,7 +127,7 @@ namespace MTS_PDF_Table
 
             // Подготовка таблицы
             DataTable In = new DataTable();
-            In.TableName = "Исходные данные";
+            In.TableName = PureName;
             int k = 1;
             foreach (object X in FromSheet.Columns())
                 In.Columns.Add(FromSheet.RangeUsed().RowsUsed().ToArray()[0].Cell(k).Value.ToString(),
@@ -144,7 +146,14 @@ namespace MTS_PDF_Table
                 object[] NewRow = new object[In.Columns.Count];
                 for (int j = 0; j < In.Columns.Count; j++)
                     NewRow[j] = row.Cell(j + 1).Value;
-                In.Rows.Add(NewRow);
+                try
+                {
+                    In.Rows.Add(NewRow);
+                }
+                catch (Exception e)
+                {
+                    LogWindow.Add($"{PureName}: строка {row.RowNumber()}: ошибка загрузки данных (неправильный формат): {e.Message}");
+                }
                 SetStatus(StatusStr, i++, m);
                 Wait();
             }

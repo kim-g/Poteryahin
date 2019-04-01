@@ -54,103 +54,311 @@ namespace MTS_PDF_Table
                 switch (Col.Caption.ToLowerInvariant())
                 {
                     case "номер":
-                        Number = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            Number = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            Number = "";
+                            ToLog(InTable.TableName, Position, Col.Caption,e.Message);
+                        }
                         break;
                     case "icc":
-                        string[] ICC_Arr = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString().Split(' ');
-                        ICC = ICC_Arr[0];
-                        ICC_Suffix = ICC_Arr[1];
+                        try
+                        {
+                            string ICC_Str = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString().
+                                Replace('-', ' ').Replace('_', ' ').Replace('=', ' ').Replace('+', ' ');
+                            string[] ICC_Arr = ICC_Str.Split(' ');
+                            ICC = ICC_Arr[0];
+                            ICC_Suffix = ICC_Arr[1];
+                        }
+                        catch (Exception e)
+                        {
+                            ICC = "";
+                            ICC_Suffix = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "фамилия":
-                        Surname = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            Surname = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            Surname = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "имя":
-                        Name = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            Name = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            Name = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "отчество":
-                        SecondName = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            SecondName = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            SecondName = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "пол":
-                        Sex = (InTable.Rows[Position].ItemArray[Col.Ordinal].ToString().ToLowerInvariant() == "м")
+                        try
+                        {
+                            Sex = (InTable.Rows[Position].ItemArray[Col.Ordinal].ToString().ToLowerInvariant() == "м")
                             || (InTable.Rows[Position].ItemArray[Col.Ordinal].ToString().ToLowerInvariant() == "m");
+                        }
+                        catch (Exception e)
+                        {
+                            Sex = false;
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "место рождения":
-                        BirthPlace = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            BirthPlace = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            BirthPlace = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "гражданство":
-                        Citizenship = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            Citizenship = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            Citizenship = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "документ удост личность":
-                        Document = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            Document = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            Document = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "серия":
-                        DocumentSerie = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            DocumentSerie = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            DocumentSerie = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "номер документа":
-                        DocumentNumber = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            DocumentNumber = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            DocumentNumber = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "кем выдан":
-                        string Str = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
-                        if (Str.Length < 50)
+                        try
                         {
-                            DocumentIssuedBy[0] = Str;
-                            DocumentIssuedBy[1] = "";
-                        }
-                        else
-                        {
-
-                            for (int i=50; i>0; i--)
+                            string Str = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                            if (Str.Length < 50)
                             {
-                                if (Str[i] == ' ')
+                                DocumentIssuedBy[0] = Str;
+                                DocumentIssuedBy[1] = "";
+                            }
+                            else
+                            {
+                                for (int i=50; i>0; i--)
                                 {
-                                    DocumentIssuedBy[0] = Str.Remove(i);
-                                    DocumentIssuedBy[1] = Str.Substring(i + 1);
-                                    break;
+                                    if (Str[i] == ' ')
+                                    {
+                                        DocumentIssuedBy[0] = Str.Remove(i);
+                                        DocumentIssuedBy[1] = Str.Substring(i + 1);
+                                        break;
+                                    }
                                 }
                             }
                         }
+                        catch (Exception e)
+                        {
+                            DocumentIssuedBy = new string[] { "", "" };
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "дата выдачи":
-                        DocumentIssueDate = DateTime.Parse(InTable.Rows[Position].ItemArray[Col.Ordinal].ToString());
+                        try
+                        {
+                            DocumentIssueDate = DateTime.Parse(InTable.Rows[Position].ItemArray[Col.Ordinal].ToString());
+                        }
+                        catch (Exception e)
+                        {
+                            DocumentIssueDate = DateTime.Now;
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "код подразделения":
-                        DocumentIndex = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            DocumentIndex = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            DocumentIndex = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "дата рождения":
-                        Birth = DateTime.Parse(InTable.Rows[Position].ItemArray[Col.Ordinal].ToString());
+                        try
+                        {
+                            Birth = DateTime.Parse(InTable.Rows[Position].ItemArray[Col.Ordinal].ToString());
+                        }
+                        catch (Exception e)
+                        {
+                            Birth = DateTime.Now;
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "индекс":
-                        PlaceIndex = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            PlaceIndex = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            PlaceIndex = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "город":
-                        PlaceCity = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            PlaceCity = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            PlaceCity = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "улица":
-                        PlaceStreet = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            PlaceStreet = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            PlaceStreet = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "дом":
-                        PlaceBuilding = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            PlaceBuilding = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            PlaceBuilding = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "кв.":
-                        PlaceFlat = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            PlaceFlat = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            PlaceFlat = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "тариф":
-                        Rate = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            Rate = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            Rate = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "дата заключения догвора":
-                        ContractConclusionDate = DateTime.Parse(InTable.Rows[Position].ItemArray[Col.Ordinal].ToString());
+                        try
+                        {
+                            ContractConclusionDate = DateTime.Parse(InTable.Rows[Position].ItemArray[Col.Ordinal].ToString());
+                        }
+                        catch (Exception e)
+                        {
+                            ContractConclusionDate = DateTime.Now;
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "место заключения":
-                        ContractConclusionPlace = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            ContractConclusionPlace = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            ContractConclusionPlace = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "продавец":
-                        Seller = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            Seller = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            Seller = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                     case "код торговой точки":
-                        SellerID = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        try
+                        {
+                            SellerID = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                            SellerID = "";
+                            ToLog(InTable.TableName, Position, Col.Caption, e.Message);
+                        }
                         break;
                 }
             }
+        }
+
+        private void ToLog(string TableName, int Position, string ColumnName, string ErrorText)
+        {
+            MTS_PDF_Window.LogWindow.Add($"{TableName}: строка {Position + 2}, " +
+                                $"столбец {ColumnName}: Ошибка чтения данных: {ErrorText}");
         }
 
         public void FillForm(string newFile)
