@@ -2,6 +2,7 @@
 using System;
 using System.Data;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace MTS_PDF_Table
 {
@@ -57,6 +58,9 @@ namespace MTS_PDF_Table
                         try
                         {
                             Number = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
+                            Number = Number.Replace("-", "").Replace("(", "").Replace(")", "");
+                            Regex phone = new Regex(@"^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?([\d\- ]{3})([\d\- ]{4,5})$");
+                            Number = phone.Replace(Number, "($3) $4-$5");
                         }
                         catch (Exception e)
                         {
@@ -402,7 +406,6 @@ namespace MTS_PDF_Table
             pdfFormFields.SetField("22", PlaceIndex);
             pdfFormFields.SetField("24", PlaceCity);
             pdfFormFields.SetField("25", PlaceStreet + ", " + PlaceBuilding + ", " + PlaceFlat);
-            pdfFormFields.SetField("51", Number);
             pdfFormFields.SetField("58", SellerID);
             pdfFormFields.SetField("59", Seller);
             pdfFormFields.SetField("60", ICC);

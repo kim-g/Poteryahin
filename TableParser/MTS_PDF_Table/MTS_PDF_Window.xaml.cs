@@ -166,7 +166,7 @@ namespace MTS_PDF_Table
         /// </summary>
         private void Wait()
         {
-            Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { }));
+            Application.Current.Dispatcher.Invoke(new ThreadStart(delegate { }), DispatcherPriority.Background);
         }
 
         /// <summary>
