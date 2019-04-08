@@ -51,7 +51,7 @@ namespace MTS_PDF_Table
         /// </summary>
         public PersonInfo(DataTable InTable, int Position)
         {
-            Line = Position.ToString("D6");
+            Line = (Position + MTS_PDF_Window.Head + 1).ToString("D6");
             foreach (DataColumn Col in InTable.Columns)
             {
                 switch (Col.Caption.ToLowerInvariant())

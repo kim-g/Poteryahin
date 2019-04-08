@@ -18,7 +18,7 @@ namespace MTS_PDF_Table
     /// </summary>
     public partial class MTS_PDF_Window : Window
     {
-        const int Head = 1;
+        public const int Head = 1;
         bool Abort = false;
         int LastPercent = 143;
         public static Log LogWindow = new Log();
