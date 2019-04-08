@@ -185,5 +185,10 @@ namespace MTS_PDF_Table
                 LastPercent = NewPercent;
             }
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            LogWindow.Close();
+        }
     }
 }

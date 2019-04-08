@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MTS_PDF_Table"
         mc:Ignorable="d"
-        Title="MTS_PDF_Window" Height="259.561" Width="800" SizeToContent="Height">
+        Title="MTS_PDF_Window" Height="259.561" Width="800" SizeToContent="Height" Closing="Window_Closing">
     <Grid Margin="10">
         <StackPanel Orientation="Vertical" UseLayoutRounding="False" Margin="0" Width="{Binding ActualWidth, ElementName=grid, Mode=OneWay}">
             <Grid Margin="0,0,0,10">
