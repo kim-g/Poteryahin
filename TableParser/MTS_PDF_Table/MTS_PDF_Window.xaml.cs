@@ -75,7 +75,7 @@ namespace MTS_PDF_Table
                 for (int i = 0; i < InTable.Rows.Count; i++)
                 {
                     PersonInfo PI = new PersonInfo(InTable, i);
-                    PI.FillForm(Path.Combine(OutTB.Text, PI.Number + ".pdf"));
+                    PI.FillForm(Path.Combine(OutTB.Text, $"{PI.Line} - {PI.Number}.pdf"));
                     SetStatus(StatusStr, i, m);
                     Wait();
                     if (Abort) return;

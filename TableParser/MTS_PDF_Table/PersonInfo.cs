@@ -34,6 +34,7 @@ namespace MTS_PDF_Table
         public string ContractConclusionPlace { get; set; }
         public string Seller { get; set; }
         public string SellerID { get; set; }
+        public string Line { get; set; }
 
         const string pdfTemplate = @"Standart.pdf";
 
@@ -50,6 +51,7 @@ namespace MTS_PDF_Table
         /// </summary>
         public PersonInfo(DataTable InTable, int Position)
         {
+            Line = Position.ToString("D6");
             foreach (DataColumn Col in InTable.Columns)
             {
                 switch (Col.Caption.ToLowerInvariant())
