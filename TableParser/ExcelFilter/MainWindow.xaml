@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExcelFilter"
         mc:Ignorable="d"
-        Title="Фильтрование данных из Excel" Width="593.5" ResizeMode="CanMinimize" SizeToContent="Height">
+        Title="Фильтрование данных из Excel" Width="549.148" ResizeMode="CanMinimize" SizeToContent="Height" Height="303.76">
     <Grid x:Name="grid" Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -45,8 +45,9 @@
                 <Button x:Name="SaveOutFile" Grid.Column="2" Content="..." Padding="5,1" HorizontalAlignment="Left" Width="22" Click="SaveOutFile_Click"/>
             </Grid>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="FilterExists" Content="Отфильтровать по совпадению" Margin="0,0,10,0" Padding="10,1" Click="FilterExists_Click" Tag="0"/>
-                <Button x:Name="FilterТщеExists" Content="Отфильтровать по различиям" Margin="0" Padding="10,1" Click="FilterExists_Click" Tag="1"/>
+                <Button x:Name="FilterExists" Content="Отфильтровать по совпадению" Margin="0,0,10,0" Padding="10,1" Click="FilterExists_Click" Tag="intersection"/>
+                <Button x:Name="FilterТщеExists" Content="Отфильтровать по различиям" Margin="0,0,10,0" Padding="10,1" Click="FilterExists_Click" Tag="difference"/>
+                <Button x:Name="NoFilter" Content="Нет в фильтрах" Margin="0" Padding="10,1" Click="FilterExists_Click" Tag="lack of filters"/>
                 <Button x:Name="Aborting" Content="Прервать выполнение" Margin="0" Padding="10,1" Click="Aborting_Click" Visibility="Collapsed"/>
             </StackPanel>
             <Label x:Name="Status" HorizontalContentAlignment="Center" FontWeight="Bold">

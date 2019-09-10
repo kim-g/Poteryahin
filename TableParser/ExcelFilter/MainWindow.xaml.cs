@@ -63,6 +63,7 @@ namespace ExcelFilter
             Abort = false;
             FilterExists.Visibility = Visibility.Collapsed;
             FilterТщеExists.Visibility = Visibility.Collapsed;
+            NoFilter.Visibility = Visibility.Collapsed;
             Aborting.Visibility = Visibility.Visible;
 
             // Открытие исходных файлов и подготовка DataTable таблиц
@@ -73,6 +74,8 @@ namespace ExcelFilter
             StatusBlock.Text = "Открытие файла фильтров";
             Wait();
             if (Abort) return;
+
+            string Operation = ((FrameworkElement)sender).Tag.ToString();
 
             foreach (object FilterFile in FilterTB.Items)
             {
@@ -86,26 +89,54 @@ namespace ExcelFilter
                 if (Abort) return;
 
                 // Обработка фильтра
-                Out = ((FrameworkElement)sender).Tag.ToString() == "0"
-                    ? FindOverlap(In, Filter, Out, FilterName)
-                    : FindDifferences(In, Filter, Out, FilterName);
-                if (Out == null) return;
+                switch (Operation)
+                {
+                    case "intersection":
+                        Out = FindOverlap(In, Filter, Out, FilterName);
+                        break;
 
-                // Сохраняем данные
+                    case "difference":
+                        Out = FindDifferences(In, Filter, Out, FilterName);
+                        break;
+
+                    case "lack of filters":
+                        In = FindDifferences(In, Filter, Out, FilterName);
+                        break;
+                }
+                if (Out == null || In  == null) return;
+
+                // Сохраняем данные, если не поиск по ВСЕМ фильтрам
+                if (new string[] { "intersection", "difference" }.Contains(Operation))
+                {
+                    StatusBlock.Text = $"{FilterName}: Сохранение данных";
+                    Wait();
+                    if (Abort) return;
+                    SaveToXMLS(Out, Path.Combine(OutTB.Text, Path.GetFileName(FilterFile.ToString())));
+                    Wait();
+                    if (Abort) return;
+                }
+                StatusBlock.Text = $"{FilterName}: Данные отфильтрованы";
+            }
+
+            // Сохраняем данные ГЛОБАЛЬНОГО поиска
+            if (new string[] { "lack of filters" }.Contains(Operation))
+            {
+                string FilterName = "AbsenceInFilters.xlsx";
                 StatusBlock.Text = $"{FilterName}: Сохранение данных";
                 Wait();
                 if (Abort) return;
-                SaveToXMLS(Out, Path.Combine(OutTB.Text, Path.GetFileName(FilterFile.ToString())));
+                SaveToXMLS(In, Path.Combine(OutTB.Text, FilterName));
                 Wait();
                 if (Abort) return;
-                StatusBlock.Text = $"{FilterName}: Данные отфильтрованы";
             }
+
             StatusBlock.Text = $"Выберите файлы и операцию";
             MessageBox.Show("Все данные отфильтрованы");
             FilterExists.Visibility = Visibility.Visible;
             FilterТщеExists.Visibility = ShowDifBtn
                 ? Visibility.Visible
                 : Visibility.Collapsed;
+            NoFilter.Visibility = Visibility.Visible;
             Aborting.Visibility = Visibility.Collapsed;
         }
 
@@ -171,9 +202,13 @@ namespace ExcelFilter
             DataTable In = new DataTable();
             In.TableName = "Исходные данные";
             int k = 1;
-            foreach(object X in FromSheet.Columns())
-                In.Columns.Add(FromSheet.RangeUsed().RowsUsed().ToArray()[0].Cell(k).Value.ToString(), 
+            foreach (object X in FromSheet.Columns())
+            {
+                if (FromSheet.RangeUsed().RowsUsed().ToArray()[0].Cell(k).Value.ToString() == "") continue;
+
+                In.Columns.Add(FromSheet.RangeUsed().RowsUsed().ToArray()[0].Cell(k).Value.ToString(),
                     FromSheet.RangeUsed().RowsUsed().ToArray()[1].Cell(k++).Value.GetType());
+            }
 
             // Подготовка счётчиков для статусной строки
             string StatusStr = "Загрузка данных";
@@ -294,6 +329,7 @@ namespace ExcelFilter
                 FilterТщеExists.Visibility = ShowDifBtn
                     ? Visibility.Visible
                     : Visibility.Collapsed;
+                NoFilter.Visibility = Visibility.Visible;
                 Aborting.Visibility = Visibility.Collapsed;
             }
         }
@@ -350,7 +386,7 @@ namespace ExcelFilter
         }
 
         /// <summary>
-        /// Ищет hfpybwe исходных данных с фильтром
+        /// Ищет разницу исходных данных с фильтром
         /// </summary>
         /// <param name="In">Входные данные</param>
         /// <param name="Filter">Фильтр</param>
@@ -368,17 +404,22 @@ namespace ExcelFilter
             // Ищем совпадения
             foreach (DataRow inrow in In.Rows)
             {
-                bool Found = false;
-                foreach (DataRow frow in Filter.Rows)
+                bool Stop = false;
+                foreach (object InCell in inrow.ItemArray)
                 {
-                    if (inrow.ItemArray[0].ToString() == frow.ItemArray[0].ToString())
+                    foreach (DataRow frow in Filter.Rows)
                     {
-                        Found = true;
-                        break;
+                        if (InCell.ToString() == frow.ItemArray[0].ToString())
+                        {
+                            Stop = true;
+                            break;
+                        }
+                        if (Stop) break;
                     }
+                    if (Stop) break;
                 }
+                if (!Stop) Out.Rows.Add(inrow.ItemArray);
                 SetStatus(StatusStr, i++, m);
-                if (!Found) Out.Rows.Add(inrow.ItemArray);
                 Wait();
                 if (Abort) return null;
             }
