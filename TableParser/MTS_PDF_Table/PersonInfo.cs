@@ -386,7 +386,7 @@ namespace MTS_PDF_Table
 
         private string CharCode(int code)
         {
-            ToLog("CharCode", 0, "", code.ToString());
+            //ToLog("CharCode", 0, "", code.ToString());
 
             switch (code)
             {
@@ -466,7 +466,7 @@ namespace MTS_PDF_Table
                     check = check % 103;
                     result = "›" + result + charcode(check) + "œ";
 
-                    ToLog("CharCode", 0, "", result);
+                    //ToLog("CharCode", 0, "", result);
 
                     form.SetField("barcode", result);
 
