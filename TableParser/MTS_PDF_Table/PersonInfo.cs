@@ -232,7 +232,9 @@ namespace MTS_PDF_Table
                         try
                         {
                             DocumentIndex = InTable.Rows[Position].ItemArray[Col.Ordinal].ToString();
-                            DocumentIndex2 = DocumentIndex.Split('-');
+                            DocumentIndex2 = DocumentIndex.IndexOf('-') == -1
+                                ? new string[] { DocumentIndex, "" }
+                                : DocumentIndex.Split('-');
                         }
                         catch (Exception e)
                         {
@@ -433,7 +435,6 @@ namespace MTS_PDF_Table
                     form.SetFieldWithFont(templateReader, fonts, "14", DocumentSerie);
                     form.SetFieldWithFont(templateReader, fonts, "15", DocumentNumber);
                     form.SetFieldWithFont(templateReader, fonts, "16", DocumentIssuedBy[0] + DocumentIssuedBy[1]);
-                    //form.SetFieldWithFont(templateReader, fonts, "17", DocumentIssuedBy[1]);
                     form.SetFieldWithFont(templateReader, fonts, "17", DocumentIssueDate.Day.ToString("D2"));
                     form.SetFieldWithFont(templateReader, fonts, "18", DocumentIssueDate.Month.ToString("D2"));
                     form.SetFieldWithFont(templateReader, fonts, "19", DocumentIssueDate.Year.ToString("D4"));
@@ -452,23 +453,7 @@ namespace MTS_PDF_Table
                     form.SetFieldWithFont(templateReader, fonts, "61", ContractConclusionDate.Month.ToString("D2"));
                     form.SetFieldWithFont(templateReader, fonts, "62", ContractConclusionDate.Year.ToString("D4"));
                     form.SetFieldWithFont(templateReader, fonts, "63", ContractConclusionPlace);
-
-                    string Text = OnlyNum(ICC + ICC_Suffix + Number);
-                    int check = 105;
-                    string result = "";
-                    for (var i = 0; i < Text.Length / 2; i++)
-                    {
-                        var substr = Text.Substring(i * 2, 2);
-                        int intval = Convert.ToInt32(substr);
-                        check = check + intval * (i + 1);
-                        result = result + charcode(intval);
-                    }
-                    check = check % 103;
-                    result = "›" + result + charcode(check) + "œ";
-
-                    //ToLog("CharCode", 0, "", result);
-
-                    form.SetField("barcode", result);
+                    form.SetField("barcode", GetBarCode());
 
                     // Установка запрета на редактирование полей.
                     //resultStamper.FormFlattening = true;
@@ -477,57 +462,23 @@ namespace MTS_PDF_Table
                 }
                 templateReader.Close();
             }
-            
-            /*
-            FontFactory.RegisterDirectory(Environment.GetFolderPath(Environment.SpecialFolder.Fonts));
+        }
 
-            PdfReader pdfReader = new PdfReader(pdfTemplate);
-            PdfStamper pdfStamper = new PdfStamper(pdfReader, new FileStream(
-                newFile, FileMode.Create));
-            AcroFields pdfFormFields = pdfStamper.AcroFields;
-
-            pdfFormFields.AddSubstitutionFont(BaseFont.CreateFont(BaseFont.TIMES_ROMAN, BaseFont.WINANSI, false));
-
-            //pdfFormFields.SetField("02",  Rate, Rate, true);
-            //pdfFormFields.SetField("03", Surname);
-            pdfFormFields.SetField("04", Name);
-            pdfFormFields.SetField("05", SecondName);
-            pdfFormFields.SetField("06", Birth.Day.ToString("D2"));
-            pdfFormFields.SetField("07", Birth.Month.ToString("D2"));
-            pdfFormFields.SetField("08", Birth.Year.ToString("D4"));
-            pdfFormFields.SetField("09", Sex ? "1" : "0");
-            pdfFormFields.SetField("10", Sex ? "0" : "1");
-            pdfFormFields.SetField("11", BirthPlace);
-            pdfFormFields.SetField("13", Citizenship);
-            pdfFormFields.SetField("12", Document);
-            pdfFormFields.SetField("14", DocumentSerie);
-            pdfFormFields.SetField("15", DocumentNumber);
-            pdfFormFields.SetField("16", DocumentIssuedBy[0] + DocumentIssuedBy[1]);
-            //pdfFormFields.SetField("17", DocumentIssuedBy[1]);
-            pdfFormFields.SetField("17", DocumentIssueDate.Day.ToString("D2"));
-            pdfFormFields.SetField("18", DocumentIssueDate.Month.ToString("D2"));
-            pdfFormFields.SetField("19", DocumentIssueDate.Year.ToString("D4"));
-            pdfFormFields.SetField("20", DocumentIndex2[0]);
-            pdfFormFields.SetField("21", PlaceIndex);
-            pdfFormFields.SetField("22", DocumentIndex2[1]);
-            pdfFormFields.SetField("25", PlaceCity);
-            pdfFormFields.SetField("26", PlaceStreet + ", " + PlaceBuilding + ", " + PlaceFlat);
-            pdfFormFields.SetField("49", SellerID);
-            pdfFormFields.SetField("51", Seller);
-            pdfFormFields.SetField("iccid", ICC+"-"+ ICC_Suffix);
-            pdfFormFields.SetField("phone", Number);
-            pdfFormFields.SetField("60", ContractConclusionDate.Day.ToString("D2"));
-            pdfFormFields.SetField("61", ContractConclusionDate.Month.ToString("D2"));
-            pdfFormFields.SetField("62", ContractConclusionDate.Year.ToString("D4"));
-            pdfFormFields.SetField("63", ContractConclusionPlace);
-
-            // flatten the form to remove editting options, set it to false
-            // to leave the form open to subsequent manual edits
-
-            pdfStamper.FormFlattening = false;
-            // close the pdf
-
-            pdfStamper.Close();*/
+        private string GetBarCode()
+        {
+            string Text = OnlyNum(ICC + ICC_Suffix + Number);
+            int check = 105;
+            string result = "";
+            for (var i = 0; i < Text.Length / 2; i++)
+            {
+                var substr = Text.Substring(i * 2, 2);
+                int intval = Convert.ToInt32(substr);
+                check = check + intval * (i + 1);
+                result = result + charcode(intval);
+            }
+            check = check % 103;
+            result = "›" + result + charcode(check) + "œ";
+            return result;
         }
     }
 }
